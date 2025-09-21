@@ -1,4 +1,4 @@
-package ru.serggge.aston_spring.entity;
+package ru.serggge.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,10 +19,11 @@ public class User {
     private String name;
     private String email;
     private Integer age;
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at")
+    @Setter
     private Instant createdAt;
 
-    public User(@NonNull String name, @NonNull String email, @NonNull Integer age) {
+    public User(String name, String email, Integer age) {
         this.name = name;
         this.email = email;
         this.age = age;

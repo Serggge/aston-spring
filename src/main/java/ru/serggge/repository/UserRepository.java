@@ -1,7 +1,7 @@
-package ru.serggge.aston_spring.repository;
+package ru.serggge.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.serggge.aston_spring.entity.User;
+import ru.serggge.entity.User;
 
 import java.util.Optional;
 

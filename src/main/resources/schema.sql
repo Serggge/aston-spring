@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS users (
     name varchar(255) NOT NULL,
     email varchar(255) UNIQUE NOT NULL,
     age int NOT NULL,
-    created_at timestamp NOT NULL default current_timestamp,
+    created_at timestamp NOT NULL,
     PRIMARY KEY (id)
 );

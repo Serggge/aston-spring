@@ -1,4 +1,4 @@
-package ru.serggge.aston_spring;
+package ru.serggge;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

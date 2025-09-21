@@ -1,6 +1,6 @@
-package ru.serggge.aston_spring.service;
+package ru.serggge.service;
 
-import ru.serggge.aston_spring.entity.User;
+import ru.serggge.entity.User;
 import java.util.List;
 
 public interface UserService {

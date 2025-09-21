@@ -1,4 +1,4 @@
-package ru.serggge.aston_spring.exception;
+package ru.serggge.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

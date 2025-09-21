@@ -1,4 +1,4 @@
-package ru.serggge.aston_spring.dto;
+package ru.serggge.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

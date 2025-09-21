@@ -1,10 +1,10 @@
-package ru.serggge.aston_spring.mapper;
+package ru.serggge.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
-import ru.serggge.aston_spring.dto.*;
-import ru.serggge.aston_spring.entity.User;
+import ru.serggge.dto.*;
+import ru.serggge.entity.User;
 
 import java.util.List;
 
@@ -14,11 +14,11 @@ public class UserMapper {
 
     private final ModelMapper mapper;
 
-    public User toUser(CreateRequest request) {
+    public User toEntity(CreateRequest request) {
         return mapper.map(request, User.class);
     }
 
-    public User toUser(UpdateRequest request) {
+    public User toEntity(UpdateRequest request) {
         return mapper.map(request, User.class);
     }
 

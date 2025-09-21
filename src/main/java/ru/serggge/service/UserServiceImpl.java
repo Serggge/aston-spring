@@ -1,12 +1,14 @@
-package ru.serggge.aston_spring.service;
+package ru.serggge.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.serggge.aston_spring.entity.User;
-import ru.serggge.aston_spring.exception.UserNotFoundException;
-import ru.serggge.aston_spring.repository.UserRepository;
+import ru.serggge.entity.User;
+import ru.serggge.exception.UserNotFoundException;
+import ru.serggge.repository.UserRepository;
+
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -17,6 +19,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
+        user.setCreatedAt(Instant.now());
         return repository.save(user);
     }
 

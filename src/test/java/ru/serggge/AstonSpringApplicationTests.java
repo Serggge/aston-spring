@@ -1,4 +1,4 @@
-package ru.serggge.aston_spring;
+package ru.serggge;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

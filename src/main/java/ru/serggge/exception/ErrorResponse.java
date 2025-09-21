@@ -1,4 +1,4 @@
-package ru.serggge.aston_spring.exception;
+package ru.serggge.exception;
 
 public record ErrorResponse(String message) {
 }

@@ -1,14 +1,14 @@
-package ru.serggge.aston_spring.conrollers;
+package ru.serggge.conrollers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.serggge.aston_spring.dto.*;
-import ru.serggge.aston_spring.entity.User;
-import ru.serggge.aston_spring.mapper.UserMapper;
-import ru.serggge.aston_spring.service.UserService;
+import ru.serggge.dto.*;
+import ru.serggge.entity.User;
+import ru.serggge.mapper.UserMapper;
+import ru.serggge.service.UserService;
 import java.util.List;
 
 @RestController
@@ -23,7 +23,7 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CreateResponse create(@RequestBody @Valid CreateRequest request) {
-        User user = mapper.toUser(request);
+        User user = mapper.toEntity(request);
         user = service.createUser(user);
         log.info("User created: {}", user);
         return mapper.toCreateResponse(user);
@@ -31,7 +31,7 @@ public class UserController {
 
     @PatchMapping
     public UpdateResponse update(@RequestBody @Valid UpdateRequest request) {
-        User user = mapper.toUser(request);
+        User user = mapper.toEntity(request);
         user = service.updateUser(user);
         log.info("User updated: {}", user);
         return mapper.toUpdateResponse(user);
