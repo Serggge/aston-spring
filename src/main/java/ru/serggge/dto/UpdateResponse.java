@@ -1,7 +1,18 @@
 package ru.serggge.dto;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.time.Instant;
 
-public record UpdateResponse(@NotNull @Positive Long id, String name, String email, Integer age) {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class UpdateResponse {
+
+    private Long id;
+    private String name;
+    private String email;
+    private Integer age;
+    private Instant createdAt;
 }

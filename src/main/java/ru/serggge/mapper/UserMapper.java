@@ -2,13 +2,10 @@ package ru.serggge.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
 import ru.serggge.dto.*;
 import ru.serggge.entity.User;
-
 import java.util.List;
 
-@Component
 @RequiredArgsConstructor
 public class UserMapper {
 

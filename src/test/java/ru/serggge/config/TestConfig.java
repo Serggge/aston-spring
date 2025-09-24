@@ -8,10 +8,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 @TestConfiguration(proxyBeanMethods = false)
-public class E2eTestConfig {
+public class TestConfig {
 
     @Bean
     public PostgreSQLContainer<?> postgreSQLContainer() {
@@ -23,11 +22,6 @@ public class E2eTestConfig {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
     }
 
     @Bean
