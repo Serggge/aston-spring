@@ -10,7 +10,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 @Slf4j
 public class LoggingInterceptor {
 
-    @AfterReturning(value = "@annotation(ToLog)", returning = "result")
+    @AfterReturning(value = "@annotation(ToLog)", returning = "returnedValue")
     public void log(JoinPoint joinPoint, Object returnedValue) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Method methodToLog = methodSignature.getMethod()
