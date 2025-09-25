@@ -1,9 +1,6 @@
 package ru.serggge.conrollers;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.serggge.dto.*;
 import ru.serggge.entity.User;
@@ -12,47 +9,40 @@ import ru.serggge.service.UserService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
-@Slf4j
 @RequiredArgsConstructor
-public class UserController {
+public class UserController implements UserOperations {
 
     private final UserService service;
     private final UserMapper mapper;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CreateResponse create(@RequestBody @Valid CreateRequest request) {
+    @Override
+    public CreateResponse create(CreateRequest request) {
         User user = mapper.toEntity(request);
         user = service.createUser(user);
-        log.info("User created: {}", user);
         return mapper.toCreateResponse(user);
     }
 
-    @PatchMapping
-    public UpdateResponse update(@RequestBody @Valid UpdateRequest request) {
+    @Override
+    public UpdateResponse update(UpdateRequest request) {
         User user = mapper.toEntity(request);
         user = service.updateUser(user);
-        log.info("User updated: {}", user);
         return mapper.toUpdateResponse(user);
     }
 
-    @GetMapping("/{id}")
-    public ShowResponse show(@PathVariable("id") long userId) {
+    @Override
+    public ShowResponse show(long userId) {
         User user = service.getUser(userId);
         return mapper.toShowResponse(user);
     }
 
-    @GetMapping
-    public List<ShowResponse> showGroup(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                        @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+    @Override
+    public List<ShowResponse> showGroup(int page, int size) {
         List<User> users = service.getGroup(page, size);
         return mapper.toShowResponse(users);
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") long userId) {
+    @Override
+    public void delete(long userId) {
         service.removeUser(userId);
     }
 }

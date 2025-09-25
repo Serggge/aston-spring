@@ -2,7 +2,7 @@ spring:
   application:
     name: aston-spring
   profiles:
-    active: prod
+    active: dev
 
 ---
 server:
@@ -17,14 +17,19 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
-    jpa:
-      properties:
-        hibernate:
-          dialect: org.hibernate.dialect.PostgreSQLDialect
+#    jpa:
+#      properties:
+#        hibernate:
+#          dialect: org.hibernate.dialect.PostgreSQLDialect
 hibernate:
   dialect: org.hibernate.dialect.PostgreSQLDialect
   hbm2ddl:
     auto: update
+
+swagger:
+  app-name: ${spring.application.name}
+  app-description: User Api Example
+  app-version: 1.0
 
 ---
 server:
@@ -52,11 +57,11 @@ hibernate:
   hbm2ddl:
     auto: validate
   dialect: org.hibernate.dialect.PostgreSQLDialect
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: DEBUG
-        orm:
-          jdbc:
-            bind: TRACE
+#logging:
+#  level:
+#    org:
+#      hibernate:
+#        SQL: DEBUG
+#        orm:
+#          jdbc:
+#            bind: TRACE

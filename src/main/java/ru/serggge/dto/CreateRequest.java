@@ -15,6 +15,7 @@ public class CreateRequest {
     @NotNull
     @Email
     private String email;
-    @Positive
+    @PositiveOrZero
+    @Max(200)
     private int age;
 }

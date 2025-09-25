@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.serggge.aspect.Method;
+import ru.serggge.aspect.ToLog;
 import ru.serggge.entity.User;
 import ru.serggge.exception.UserNotFoundException;
 import ru.serggge.repository.UserRepository;
@@ -18,6 +20,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
     @Override
+    @ToLog(method = Method.CREATE)
     @Transactional
     public User createUser(User user) {
         repository.findByEmail(user.getEmail())
@@ -28,6 +31,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @ToLog(method = Method.UPDATE)
     @Transactional
     public User updateUser(User user) {
         User persistenceUser = repository.findByEmail(user.getEmail())
@@ -52,6 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @ToLog(method = Method.DELETE)
     @Transactional
     public void removeUser(long userId) {
         User user = repository.findById(userId)

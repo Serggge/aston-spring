@@ -219,7 +219,7 @@ public class UserControllerApplicationTest {
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(APPLICATION_JSON),
-                        jsonPath("$.id", is(originalUser.getId()), Long.class),
+                        jsonPath("$.id", is(savedUser.getId()), Long.class),
                         jsonPath("$.name", equalTo(newName)),
                         jsonPath("$.email", equalTo(email)),
                         jsonPath("$.age", is(newAge)),
@@ -410,7 +410,7 @@ public class UserControllerApplicationTest {
         final String email = generateEmail(username);
         final int age = generateAge();
 
-        // перед выполнением теста, сохраняем в БД user, которого далее в тесте будем искать по ID
+        // перед выполнением теста, сохраняем в БД user, которого далее в тесте будем удалять по ID
         final User user = new User(username, email, age);
         User savedUser = userRepository.save(user);
 
