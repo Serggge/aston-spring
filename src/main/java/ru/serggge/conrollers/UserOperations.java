@@ -31,8 +31,7 @@ public interface UserOperations {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = CreateResponse.class)))
-
+                                    schema = @Schema(implementation = CreateUserResponseDto.class))
                     }),
             @ApiResponse(
                     responseCode = "400",
@@ -40,14 +39,12 @@ public interface UserOperations {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    }
-            ),
+                                    schema = @Schema(implementation = ErrorResponse.class))
+                    }),
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CreateResponse create(@RequestBody @Valid CreateRequest request);
+    CreateUserResponseDto create(@RequestBody @Valid CreateUserRequestDto requestDto);
 
     @Operation(summary = "Update user fields")
     @ApiResponses(value = {
@@ -57,7 +54,7 @@ public interface UserOperations {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = UpdateResponse.class)))
+                                    schema = @Schema(implementation = UpdateUserResponseDto.class))
 
                     }),
             @ApiResponse(
@@ -66,13 +63,11 @@ public interface UserOperations {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    }
-            ),
+                                    schema = @Schema(implementation = ErrorResponse.class))
+                    }),
     })
     @PatchMapping
-    public UpdateResponse update(@RequestBody @Valid UpdateRequest request);
+    UpdateUserResponseDto update(@RequestBody @Valid UpdateUserRequestDto requestDto);
 
     @Operation(summary = "Get user by ID")
     @ApiResponses(value = {
@@ -82,7 +77,7 @@ public interface UserOperations {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ShowResponse.class))
+                                    schema = @Schema(implementation = FindUserResponseDto.class))
                     }),
             @ApiResponse(
                     responseCode = "400",
@@ -90,31 +85,26 @@ public interface UserOperations {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    }
-            ),
+                                    schema = @Schema(implementation = ErrorResponse.class))
+                    }),
             @ApiResponse(
                     responseCode = "404",
                     description = "User not found",
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    }
-            )
+                                    schema = @Schema(implementation = ErrorResponse.class))
+                    })
     })
     @Parameters(value = {
             @Parameter(name = "id",
                     in = ParameterIn.PATH,
                     description = "User ID",
                     required = true,
-                    allowEmptyValue = true,
                     schema = @Schema(type = "integer", format = "int64"))
     })
     @GetMapping("/{id}")
-    public ShowResponse show(@PathVariable("id") long userId);
+    FindUserResponseDto findById(@PathVariable("id") long userId);
 
 
     @Operation(summary = "Gets users pageable")
@@ -125,12 +115,12 @@ public interface UserOperations {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = ShowResponse.class)))
+                                    array = @ArraySchema(schema = @Schema(implementation = FindUserResponseDto.class)))
                     })
     })
     @GetMapping
-    public List<ShowResponse> showGroup(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                        @RequestParam(value = "size", required = false, defaultValue = "10") int size);
+    List<FindUserResponseDto> findAll(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                      @RequestParam(value = "size", required = false, defaultValue = "10") int size);
 
     @Operation(summary = "Delete user by ID")
     @ApiResponses(value = {
@@ -143,30 +133,25 @@ public interface UserOperations {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    }
-            ),
+                                    schema = @Schema(implementation = ErrorResponse.class))
+                    }),
             @ApiResponse(
                     responseCode = "404",
                     description = "User not found",
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    }
-            )
+                                    schema = @Schema(implementation = ErrorResponse.class))
+                    })
     })
     @Parameters(value = {
             @Parameter(name = "id",
                     in = ParameterIn.PATH,
                     description = "User ID",
                     required = true,
-                    allowEmptyValue = true,
                     schema = @Schema(type = "integer", format = "int64"))
     })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") long userId);
+    void delete(@PathVariable("id") long userId);
 }

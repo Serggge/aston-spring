@@ -11,13 +11,12 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.serggge.config.MapperConfig;
 import ru.serggge.conrollers.UserController;
-import ru.serggge.dto.CreateRequest;
-import ru.serggge.dto.UpdateRequest;
+import ru.serggge.dto.CreateUserRequestDto;
+import ru.serggge.dto.UpdateUserRequestDto;
 import ru.serggge.entity.User;
 import ru.serggge.exception.UserNotFoundException;
 import ru.serggge.service.UserService;
@@ -60,7 +59,7 @@ public class UserControllerWebLayerTest {
     @DisplayName("Create new - success")
     @SneakyThrows
     void createNewUserTest_successBehavior_statusCreated() {
-        final CreateRequest dto = new CreateRequest(user.getName(), user.getEmail(), user.getAge());
+        final CreateUserRequestDto dto = new CreateUserRequestDto(user.getName(), user.getEmail(), user.getAge());
         final String json = objectMapper.writeValueAsString(dto);
         when(userService.createUser(captor.capture())).thenReturn(user);
 
@@ -86,7 +85,7 @@ public class UserControllerWebLayerTest {
     @DisplayName("Fail Create - Duplicate email")
     @SneakyThrows
     void createNewUserTest_emailIsNotUnique_statusBadRequest() {
-        final CreateRequest dto = new CreateRequest(user.getName(), user.getEmail(), user.getAge());
+        final CreateUserRequestDto dto = new CreateUserRequestDto(user.getName(), user.getEmail(), user.getAge());
         final String json = objectMapper.writeValueAsString(dto);
         final String errorMessage = "Email already exists";
         when(userService.createUser(captor.capture())).thenThrow(new IllegalArgumentException(errorMessage));
@@ -110,7 +109,7 @@ public class UserControllerWebLayerTest {
     @DisplayName("Fail Create - null field")
     @SneakyThrows
     void createNewUserTest_failOnNullProperty_statusBadRequest() {
-        final CreateRequest dto = new CreateRequest(null, user.getEmail(), user.getAge());
+        final CreateUserRequestDto dto = new CreateUserRequestDto(null, user.getEmail(), user.getAge());
         final String json = objectMapper.writeValueAsString(dto);
         final String errorMessage = "request validation error";
         when(userService.createUser(captor.capture())).thenReturn(user);
@@ -133,7 +132,7 @@ public class UserControllerWebLayerTest {
     @DisplayName("Fail Create - wrong email format")
     @SneakyThrows
     void createNewUserTest_failOnBadEmailFormat_statusBadRequest() {
-        final CreateRequest dto = new CreateRequest(user.getName(), "email_bad_format", user.getAge());
+        final CreateUserRequestDto dto = new CreateUserRequestDto(user.getName(), "email_bad_format", user.getAge());
         final String json = objectMapper.writeValueAsString(dto);
         final String errorMessage = "request validation error";
         when(userService.createUser(captor.capture())).thenReturn(user);
@@ -156,7 +155,7 @@ public class UserControllerWebLayerTest {
     @DisplayName("Fail Create - negative age")
     @SneakyThrows
     void createNewUserTest_failOnNegativeAge_statusBadRequest() {
-        final CreateRequest dto = new CreateRequest(user.getName(), user.getEmail(), -1);
+        final CreateUserRequestDto dto = new CreateUserRequestDto(user.getName(), user.getEmail(), -1);
         final String json = objectMapper.writeValueAsString(dto);
         final String errorMessage = "request validation error";
         when(userService.createUser(captor.capture())).thenReturn(user);
@@ -179,7 +178,7 @@ public class UserControllerWebLayerTest {
     @DisplayName("Update user - success")
     @SneakyThrows
     void updateUser_successBehavior_statusOk() {
-        final UpdateRequest dto = new UpdateRequest(user.getName(), user.getEmail(), user.getAge());
+        final UpdateUserRequestDto dto = new UpdateUserRequestDto(user.getName(), user.getEmail(), user.getAge());
         final String json = objectMapper.writeValueAsString(dto);
         when(userService.updateUser(captor.capture())).thenReturn(user);
 
@@ -204,7 +203,7 @@ public class UserControllerWebLayerTest {
     @DisplayName("Fail Update - email not found")
     @SneakyThrows
     void updateUser_emailNotFound_statusNotFound() throws JsonProcessingException {
-        UpdateRequest dto = new UpdateRequest(user.getName(), user.getEmail(), user.getAge());
+        UpdateUserRequestDto dto = new UpdateUserRequestDto(user.getName(), user.getEmail(), user.getAge());
         final String json = objectMapper.writeValueAsString(dto);
         final String errorMessage = "Email not found";
         when(userService.updateUser(captor.capture())).thenThrow(new UserNotFoundException(errorMessage));

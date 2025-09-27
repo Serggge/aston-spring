@@ -8,7 +8,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 
 @Aspect
 @Slf4j
-public class LoggingInterceptor {
+public class LoggingAspect {
 
     @AfterReturning(value = "@annotation(ToLog)", returning = "returnedValue")
     public void log(JoinPoint joinPoint, Object returnedValue) {

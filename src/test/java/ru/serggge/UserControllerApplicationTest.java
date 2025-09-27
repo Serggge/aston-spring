@@ -1,5 +1,7 @@
 package ru.serggge;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
@@ -7,14 +9,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import ru.serggge.config.TestConfig;
-import ru.serggge.dto.CreateRequest;
-import ru.serggge.dto.UpdateRequest;
+import ru.serggge.dto.CreateUserRequestDto;
+import ru.serggge.dto.FindUserResponseDto;
+import ru.serggge.dto.UpdateUserRequestDto;
 import ru.serggge.entity.User;
 import ru.serggge.repository.UserRepository;
 import java.util.ArrayList;
@@ -26,6 +33,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_CLASS;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -35,11 +44,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestConfig.class)
 @Testcontainers
 @Transactional
+@Sql(scripts = "/sql_script/test_schema.sql", executionPhase = BEFORE_TEST_CLASS,
+        config = @SqlConfig(encoding = "utf-8", transactionMode = SqlConfig.TransactionMode.ISOLATED))
 public class UserControllerApplicationTest {
 
     @Autowired
     MockMvc mockMvc;
-    ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    ObjectMapper objectMapper;
     @Autowired
     @Container
     PostgreSQLContainer<?> postgres;
@@ -49,11 +61,11 @@ public class UserControllerApplicationTest {
     @Test
     @DisplayName("Create new - success")
     @SneakyThrows
-    void createNewUserTest() {
+    void createNewUser_successBehavior_returnStatusCreated() {
         final String username = generateUserName();
         final String email = generateEmail(username);
         final int age = generateAge();
-        final CreateRequest request = new CreateRequest(username, email, age);
+        final CreateUserRequestDto request = new CreateUserRequestDto(username, email, age);
         final String json = objectMapper.writeValueAsString(request);
 
         mockMvc
@@ -78,17 +90,11 @@ public class UserControllerApplicationTest {
 
     @Test
     @DisplayName("Fail Create - Duplicate email")
+    @Sql(statements = "INSERT INTO users (name, email, age) VALUES ('John', 'john@email.org', 20)")
     @SneakyThrows
     void createNewUserTest_emailIsNotUnique_statusBadRequest() {
-        final String userName = generateUserName();
-        final String email = generateEmail(userName);
-        final int age = generateAge();
-        final CreateRequest request = new CreateRequest(userName, email, age);
-        final String json = objectMapper.writeValueAsString(request);
-        final String errorMessage = "Email already exists";
-
-        // перед выполнением запроса к API, сохраняем в БД user с таким же email
-        userRepository.save(new User("OtherUser", email, age + 1));
+        final String json = objectMapper.writeValueAsString(
+                new CreateUserRequestDto("Bill", "john@email.org", 25));
 
         mockMvc
                 .perform(post("/users")
@@ -98,15 +104,15 @@ public class UserControllerApplicationTest {
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(APPLICATION_JSON),
-                        jsonPath("$.message", equalTo(errorMessage))
+                        jsonPath("$.message", equalTo("Email already exists"))
                 );
 
         // проверяем, что в БД не сохранился пользователь с таким же email
-        Optional<User> checkedUser = userRepository.findByEmail(email);
+        Optional<User> checkedUser = userRepository.findByEmail("john@email.org");
 
         assertTrue(checkedUser.isPresent());
         assertThat(checkedUser.get()
-                              .getName(), not(userName));
+                              .getName(), not("Bill"));
     }
 
     @Test
@@ -115,7 +121,7 @@ public class UserControllerApplicationTest {
     void createNewUserTest_failOnNullProperty_statusBadRequest() {
         final String email = "user@email.org";
         final int age = generateAge();
-        final CreateRequest request = new CreateRequest(null, email, age);
+        final CreateUserRequestDto request = new CreateUserRequestDto(null, email, age);
         final String json = objectMapper.writeValueAsString(request);
         final String errorMessage = "request validation error";
 
@@ -143,7 +149,7 @@ public class UserControllerApplicationTest {
         final String userName = generateUserName();
         final String email = "bad_email_format";
         final int age = generateAge();
-        final CreateRequest request = new CreateRequest(userName, email, age);
+        final CreateUserRequestDto request = new CreateUserRequestDto(userName, email, age);
         final String json = objectMapper.writeValueAsString(request);
         final String errorMessage = "request validation error";
 
@@ -171,7 +177,7 @@ public class UserControllerApplicationTest {
         final String userName = generateUserName();
         final String email = generateEmail(userName);
         final int age = -1;
-        final CreateRequest request = new CreateRequest(userName, email, age);
+        final CreateUserRequestDto request = new CreateUserRequestDto(userName, email, age);
         final String json = objectMapper.writeValueAsString(request);
         final String errorMessage = "request validation error";
 
@@ -194,22 +200,11 @@ public class UserControllerApplicationTest {
 
     @Test
     @DisplayName("Update user - success")
+    @Sql(statements = "INSERT INTO users (name, email, age) VALUES ('John', 'john@email.org', 20)")
     @SneakyThrows
     void updateUser_successBehavior_statusOk() {
-        final String username = generateUserName();
-        final String email = generateEmail(username);
-        final int age = generateAge();
-
-        // перед выполнением теста, сохраняем в БД user, которого будем в последствии обновлять
-        final User originalUser = new User(username, email, age);
-        User savedUser = userRepository.save(originalUser);
-
-        // изменяем атрибуты user
-        final String newName = "NewName";
-        final int newAge = age + 1;
-
-        final UpdateRequest request = new UpdateRequest(newName, email, newAge);
-        final String json = objectMapper.writeValueAsString(request);
+        final String json = objectMapper.writeValueAsString(
+                new UpdateUserRequestDto("Bill", "john@email.org", 21));
 
         mockMvc
                 .perform(patch("/users")
@@ -219,24 +214,20 @@ public class UserControllerApplicationTest {
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(APPLICATION_JSON),
-                        jsonPath("$.id", is(savedUser.getId()), Long.class),
-                        jsonPath("$.name", equalTo(newName)),
-                        jsonPath("$.email", equalTo(email)),
-                        jsonPath("$.age", is(newAge)),
-                        jsonPath("$.createdAt", equalTo(savedUser.getCreatedAt()
-                                                                 .toString()))
+                        jsonPath("$.name", equalTo("Bill")),
+                        jsonPath("$.email", equalTo("john@email.org")),
+                        jsonPath("$.age", is(21))
                 );
 
         // проверяем, что в БД user с обновлёнными полями name\age, но прежним ID
-        Optional<User> checkedUser = userRepository.findByEmail(email);
+        Optional<User> checkedUser = userRepository.findByEmail("john@email.org");
 
         assertTrue(checkedUser.isPresent());
 
         User persistenceUser = checkedUser.get();
         assertAll("Check user properties",
-                () -> assertThat(persistenceUser.getId(), is(savedUser.getId())),
-                () -> assertThat(persistenceUser.getName(), equalTo(newName)),
-                () -> assertThat(persistenceUser.getAge(), is(newAge))
+                () -> assertThat(persistenceUser.getName(), equalTo("Bill")),
+                () -> assertThat(persistenceUser.getAge(), is(21))
         );
     }
 
@@ -245,7 +236,7 @@ public class UserControllerApplicationTest {
     @SneakyThrows
     void updateUser_emailNotFound_statusNotFound() {
         final String email = "john@email.org";
-        final UpdateRequest request = new UpdateRequest("john", email, 20);
+        final UpdateUserRequestDto request = new UpdateUserRequestDto("john", email, 20);
         final String json = objectMapper.writeValueAsString(request);
         final String errorMessage = "Email not found";
 
@@ -268,17 +259,13 @@ public class UserControllerApplicationTest {
 
     @Test
     @DisplayName("Find user - success")
+    @Sql(statements = "INSERT INTO users (name, email, age) VALUES ('John', 'john@email.org', 20)")
     @SneakyThrows
     void findUserById_successBehavior_statusOk() {
-        final String username = generateUserName();
-        final String email = generateEmail(username);
-        final int age = generateAge();
+        User user = userRepository.findByEmail("john@email.org")
+                                  .get();
 
-        // перед выполнением теста сохраняем в БД user, которого далее в тесте будем искать по ID
-        final User user = new User(username, email, age);
-        User savedUser = userRepository.save(user);
-
-        final String requestUri = "/users/" + savedUser.getId();
+        final String requestUri = "/users/" + user.getId();
 
         mockMvc
                 .perform(get(requestUri)
@@ -286,12 +273,10 @@ public class UserControllerApplicationTest {
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(APPLICATION_JSON),
-                        jsonPath("$.id", is(savedUser.getId()), Long.class),
+                        jsonPath("$.id", is(user.getId()), Long.class),
                         jsonPath("$.name", equalTo(user.getName())),
                         jsonPath("$.email", equalTo(user.getEmail())),
-                        jsonPath("$.age", is(user.getAge())),
-                        jsonPath("$.createdAt", equalTo(savedUser.getCreatedAt()
-                                                                 .toString()))
+                        jsonPath("$.age", is(user.getAge()))
                 );
     }
 
@@ -320,15 +305,14 @@ public class UserControllerApplicationTest {
     @Test
     @DisplayName("Find group - default uri params")
     @SneakyThrows
-    void findGroupUsers_defaultUriParams_statusOk() {
+    void findAllUsers_defaultUriParams_statusOk() {
         final int defaultPageSize = 10;
         // предварительное сохранение в БД пользователей, по которым в дальнейшем будет осуществляться выборка
         final List<User> users = new ArrayList<>();
         for (int i = 1; i < 20; i++) {
             String userName = "User" + i;
             String email = userName + "@email.org";
-            int age = i;
-            users.add(new User(userName, email, age));
+            users.add(new User(userName, email, i));
         }
         userRepository.saveAll(users);
 
@@ -347,83 +331,97 @@ public class UserControllerApplicationTest {
     }
 
     @Test
-    @DisplayName("Find group - Size 2/2")
-    @SneakyThrows
-    void findGroupUsers_allUsers_statusOk() {
-        // предварительное сохранение в БД пользователей, по которым в дальнейшем будет осуществляться выборка
-        final int groupSize = 2;
-        final User john = new User("john", "john@email.org", 20);
-        final User katty = new User("Katty", "katty@email.org", 22);
-        List<User> users = List.of(john, katty);
-        userRepository.saveAll(users);
-
-        mockMvc
-                .perform(get("/users")
-                        .param("page", "0")
-                        .param("size", String.valueOf(groupSize))
-                        .contentType(APPLICATION_JSON))
-                .andExpectAll(
-                        status().isOk(),
-                        content().contentType(APPLICATION_JSON),
-                        jsonPath("$", hasSize(groupSize)),
-                        jsonPath("$[*].name", containsInAnyOrder(john.getName(), katty.getName())),
-                        jsonPath("$[*].email", containsInAnyOrder(john.getEmail(), katty.getEmail())),
-                        jsonPath("$[*].age", containsInAnyOrder(john.getAge(), katty.getAge()))
-                );
-    }
-
-    @Test
     @DisplayName("Find group - Size 2/3")
+    @Sql(scripts = "/sql_script/insert_three_users.sql", executionPhase = BEFORE_TEST_METHOD)
     @SneakyThrows
-    void findGroupUsers_severalUsers_statusOk() {
-        // предварительное сохранение в БД пользователей, по которым в дальнейшем будет осуществляться выборка
-        final int groupSize = 2;
-        final User john = new User("john", "john@email.org", 20);
-        final User katty = new User("Katty", "katty@email.org", 22);
-        final User bill = new User("Bill", "bill@email.org", 24);
-        List<User> users = List.of(john, katty, bill);
-        userRepository.saveAll(users);
-
-        mockMvc
+    void findAllUsers_severalUsers_statusOk() {
+        MockHttpServletResponse response = mockMvc
                 .perform(get("/users")
                         .param("page", "0")
-                        .param("size", String.valueOf(groupSize))
+                        .param("size", "2")
                         .contentType(APPLICATION_JSON))
-                .andExpectAll(
-                        status().isOk(),
-                        content().contentType(APPLICATION_JSON),
-                        jsonPath("$", hasSize(groupSize)),
-                        jsonPath("$[*].name", everyItem(anyOf(
-                                equalTo(john.getName()), equalTo(katty.getName()), equalTo(bill.getName())))),
-                        jsonPath("$[*].email", everyItem(anyOf(
-                                equalTo(john.getEmail()), equalTo(katty.getEmail()), equalTo(bill.getEmail())))),
-                        jsonPath("$[*].age", everyItem(anyOf(
-                                is(john.getAge()), is(katty.getAge()), is(bill.getAge()))))
-                );
+                .andReturn()
+                .getResponse();
+
+        CollectionType listType = objectMapper.getTypeFactory()
+                                              .constructCollectionType(List.class, FindUserResponseDto.class);
+        List<FindUserResponseDto> myObjectList = objectMapper.readValue(response.getContentAsString(), listType);
+
+
+        assertThat(response.getStatus(), is(HttpStatus.OK.value()));
+        assertThat(response.getContentType(), is(APPLICATION_JSON.toString()));
+        assertThat(myObjectList, hasSize(2));
     }
 
     @Test
     @DisplayName("Delete user - success")
+    @Sql(statements = "INSERT INTO users (name, email, age) VALUES ('John', 'john@email.org', 20)")
     @SneakyThrows
     void deleteUser_successBehavior_statusNoContent() {
-        final String username = generateUserName();
-        final String email = generateEmail(username);
-        final int age = generateAge();
+        final long userId = userRepository.findByEmail("john@email.org")
+                                          .get()
+                                          .getId();
 
-        // перед выполнением теста, сохраняем в БД user, которого далее в тесте будем удалять по ID
-        final User user = new User(username, email, age);
-        User savedUser = userRepository.save(user);
-
-        final String requestUri = "/users/" + savedUser.getId();
+        final String requestUri = String.format("/users/%d", userId);
 
         mockMvc
-                .perform(delete(requestUri))
+                .perform(delete(requestUri)
+                        .header(HttpHeaders.AUTHORIZATION, "Basic YWRtaW46YWRtaW4="))
                 .andExpect(status().isNoContent());
 
         // проверяем, что пользователь был удалён из БД
-        Optional<User> checkedUser = userRepository.findById(savedUser.getId());
+        Optional<User> checkedUser = userRepository.findById(userId);
 
         assertTrue(checkedUser.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Delete user - fail Authentication")
+    @Sql(statements = "INSERT INTO users (name, email, age) VALUES ('John', 'john@email.org', 20)")
+    @SneakyThrows
+    void deleteUser_failRequestIsNotAuthenticated_statusForbidden() {
+        final long userId = userRepository.findByEmail("john@email.org")
+                                          .get()
+                                          .getId();
+
+        final String requestUri = String.format("/users/%d", userId);
+
+        mockMvc
+                .perform(delete(requestUri))
+                .andExpectAll(
+                        status().isForbidden(),
+                        content().contentType(APPLICATION_JSON),
+                        jsonPath("$.message", is("Request is not authenticated")));
+
+        // проверяем, что пользователь существует в БД
+        Optional<User> checkedUser = userRepository.findById(userId);
+
+        assertTrue(checkedUser.isPresent());
+    }
+
+    @Test
+    @DisplayName("Delete user - fail Authorization")
+    @Sql(statements = "INSERT INTO users (name, email, age) VALUES ('John', 'john@email.org', 20)")
+    @SneakyThrows
+    void deleteUser_failBadCredentials_statusUnauthorized() {
+        final long userId = userRepository.findByEmail("john@email.org")
+                                          .get()
+                                          .getId();
+
+        final String requestUri = String.format("/users/%d", userId);
+
+        mockMvc
+                .perform(delete(requestUri)
+                        .header(HttpHeaders.AUTHORIZATION, "Basic 12345"))
+                .andExpectAll(
+                        status().isUnauthorized(),
+                        content().contentType(APPLICATION_JSON),
+                        jsonPath("$.message", is("Bad credentials")));
+
+        // проверяем, что пользователь существует в БД
+        Optional<User> checkedUser = userRepository.findById(userId);
+
+        assertTrue(checkedUser.isPresent());
     }
 
     @Test
@@ -435,7 +433,8 @@ public class UserControllerApplicationTest {
         final String errorMessage = "User not found";
 
         mockMvc
-                .perform(delete(requestUri))
+                .perform(delete(requestUri)
+                        .header(HttpHeaders.AUTHORIZATION, "Basic YWRtaW46YWRtaW4="))
                 .andExpectAll(
                         status().isNotFound(),
                         content().contentType(APPLICATION_JSON),

@@ -11,27 +11,27 @@ public class UserMapper {
 
     private final ModelMapper mapper;
 
-    public User toEntity(CreateRequest request) {
+    public User toEntity(CreateUserRequestDto request) {
         return mapper.map(request, User.class);
     }
 
-    public User toEntity(UpdateRequest request) {
+    public User toEntity(UpdateUserRequestDto request) {
         return mapper.map(request, User.class);
     }
 
-    public CreateResponse toCreateResponse(User user) {
-        return mapper.map(user, CreateResponse.class);
+    public CreateUserResponseDto toCreateResponse(User user) {
+        return mapper.map(user, CreateUserResponseDto.class);
     }
 
-    public UpdateResponse toUpdateResponse(User user) {
-        return mapper.map(user, UpdateResponse.class);
+    public UpdateUserResponseDto toUpdateResponse(User user) {
+        return mapper.map(user, UpdateUserResponseDto.class);
     }
 
-    public ShowResponse toShowResponse(User user) {
-        return mapper.map(user, ShowResponse.class);
+    public FindUserResponseDto toShowResponse(User user) {
+        return mapper.map(user, FindUserResponseDto.class);
     }
 
-    public List<ShowResponse> toShowResponse(List<User> users) {
+    public List<FindUserResponseDto> toShowResponse(List<User> users) {
         return users.stream()
                     .map(this::toShowResponse)
                     .toList();

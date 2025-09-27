@@ -16,27 +16,27 @@ public class UserController implements UserOperations {
     private final UserMapper mapper;
 
     @Override
-    public CreateResponse create(CreateRequest request) {
-        User user = mapper.toEntity(request);
+    public CreateUserResponseDto create(CreateUserRequestDto requestDto) {
+        User user = mapper.toEntity(requestDto);
         user = service.createUser(user);
         return mapper.toCreateResponse(user);
     }
 
     @Override
-    public UpdateResponse update(UpdateRequest request) {
-        User user = mapper.toEntity(request);
+    public UpdateUserResponseDto update(UpdateUserRequestDto requestDto) {
+        User user = mapper.toEntity(requestDto);
         user = service.updateUser(user);
         return mapper.toUpdateResponse(user);
     }
 
     @Override
-    public ShowResponse show(long userId) {
+    public FindUserResponseDto findById(long userId) {
         User user = service.getUser(userId);
         return mapper.toShowResponse(user);
     }
 
     @Override
-    public List<ShowResponse> showGroup(int page, int size) {
+    public List<FindUserResponseDto> findAll(int page, int size) {
         List<User> users = service.getGroup(page, size);
         return mapper.toShowResponse(users);
     }
