@@ -3,14 +3,14 @@ package ru.serggge.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import ru.serggge.aspect.LoggingInterceptor;
+import ru.serggge.aspect.LoggingAspect;
 
 @Configuration
 @EnableAspectJAutoProxy
 public class AspectConfig {
 
     @Bean
-    public LoggingInterceptor loggingInterceptor() {
-        return new LoggingInterceptor();
+    public LoggingAspect loggingInterceptor() {
+        return new LoggingAspect();
     }
 }

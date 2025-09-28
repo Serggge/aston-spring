@@ -3,6 +3,9 @@ spring:
     name: aston-spring
   profiles:
     active: dev
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/master.yml
 
 ---
 server:
@@ -17,14 +20,13 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
-#    jpa:
-#      properties:
-#        hibernate:
-#          dialect: org.hibernate.dialect.PostgreSQLDialect
 hibernate:
   dialect: org.hibernate.dialect.PostgreSQLDialect
   hbm2ddl:
     auto: update
+  liquibase:
+    enabled: true
+    change-log: db/changelog/db.changelog-master.yaml
 
 swagger:
   app-name: ${spring.application.name}
@@ -57,6 +59,7 @@ hibernate:
   hbm2ddl:
     auto: validate
   dialect: org.hibernate.dialect.PostgreSQLDialect
+
 #logging:
 #  level:
 #    org:

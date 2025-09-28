@@ -8,7 +8,7 @@ import java.time.Instant;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateResponse {
+public class UpdateUserResponseDto {
 
     private Long id;
     private String name;

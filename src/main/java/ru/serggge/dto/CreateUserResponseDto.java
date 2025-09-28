@@ -6,7 +6,7 @@ import java.time.Instant;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateResponse {
+public class CreateUserResponseDto {
 
     private long id;
     private String name;

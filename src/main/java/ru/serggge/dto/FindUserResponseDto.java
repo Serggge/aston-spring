@@ -1,20 +1,18 @@
 package ru.serggge.dto;
 
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.Instant;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateRequest {
+public class FindUserResponseDto {
 
+    private Long id;
     private String name;
-    @NotNull
-    @Email
     private String email;
-    @PositiveOrZero
-    @Max(200)
     private Integer age;
+    private Instant createdAt;
 }

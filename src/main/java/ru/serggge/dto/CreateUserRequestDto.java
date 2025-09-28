@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateRequest {
+public class CreateUserRequestDto {
 
     @NotBlank
     private String name;
     @NotNull
-    @Email
+    @Email(message = "Email should be valid")
     private String email;
-    @PositiveOrZero
+    @Min(0)
     @Max(200)
     private int age;
 }
