@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/create-table-users.yml
+  - include:
+      file: db/changelog/create-table-credentials.yml
+  - include:
+      file: db/changelog/create-table-outbox.yml

@@ -1,7 +1,7 @@
 services:
   postgres:
-    image: postgres
-    container_name: postgres_container
+    image: postgres:18.0-alpine
+    container_name: postgres
     environment:
       POSTGRES_DB: userdb
       POSTGRES_USER: postgres
@@ -19,18 +19,148 @@ services:
       start_period: 10s
     restart: unless-stopped
 
-  application:
-    build: ./
-    image: module3_image
-    container_name: module3_container
+
+  userService:
+    build: ./user-service/
+    image: user_service
+    container_name: user_service
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      broker1:
+        condition: service_healthy
     environment:
-      SERVER_PORT: 8080
-      POSTGRES_HOST: postgres_container
+      POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_DB: userdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      FIRST_BROKER_URL: localhost:9095
+      SECOND_BROKER_URL: localhost:9096
+      TOPIC_NOTIFICATION_NAME: email-notification
+      OUTBOX_SCHEDULED_TIME: 5000
+
+
+  notificationService1:
+    build: ./notification-service/
+    image: notification_service
+    container_name: mailsender_primary
+    ports:
+      - "8082:8082"
+    depends_on:
+      - userService
+    environment:
+      FIRST_BROKER_URL: broker1:9091
+      SECOND_BROKER_URL: broker2:9091
+      BROKER_GROUP_ID: mail-sender
+      BROKER_CLIENT_ID: first-app
+      BROKER_TOPIC_NAME: email-notification
+      SMTP_SERVER: smtp.mailbox.org
+      SMTP_PORT: 471
+      MAILBOX_USER: user
+      MAILBOX_PASSWORD: password
+
+
+  notificationService2:
+    image: notification_service
+    container_name: mailsender_second
+    ports:
+      - "8083:8082"
+    depends_on:
+      - notificationService1
+    environment:
+      FIRST_BROKER_URL: broker1:9091
+      SECOND_BROKER_URL: broker2:9091
+      BROKER_GROUP_ID: mail-sender
+      BROKER_CLIENT_ID: second-app
+      BROKER_TOPIC_NAME: email-notification
+      SMTP_SERVER: smtp.mailbox.org
+      SMTP_PORT: 471
+      MAILBOX_USER: user
+      MAILBOX_PASSWORD: password
+
+  broker1:
+    image: apache/kafka:latest
+    container_name: broker1
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_KRAFT_MODE: "true"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://:9091,EXTERNAL://:29092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://:9091,EXTERNAL://localhost:29092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 2
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9091 || exit 1" ]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  broker2:
+    image: apache/kafka:latest
+    container_name: broker2
+    ports:
+      - "29093:29093"
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_KRAFT_MODE: "true"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://:9091,EXTERNAL://:29093,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://:9091,EXTERNAL://localhost:29093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker1:9093,2@broker1:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 2
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9091 || exit 1" ]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+#  kafka-ui:
+#    container_name: kafka_ui
+#    hostname: kafka_ui
+#    image: provectuslabs/kafka-ui:latest
+#    depends_on:
+#      - broker1
+#      - broker2
+#    ports:
+#      - "8070:8080"
+#    environment:
+#      DYNAMIC_CONFIG_ENABLED: true
+
+#  schema-registry:
+#    image: confluentinc/cp-schema-registry:8.0.1
+#    hostname: schema-registry
+#    container_name: schema-registry
+#    depends_on:
+#      - broker1
+#      - broker2
+#    ports:
+#      - "8081:8081"
+#    environment:
+#      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+#      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker1:29092'
+#      SCHEMA_REGISTRY_LISTENERS: http://localhost:8081
+
+#networks:
+#  aston:
+#    driver: bridge

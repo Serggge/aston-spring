@@ -1,0 +1,24 @@
+{
+  "namespace": "ru.serggge.model",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "record",
+  "name": "AccountEvent",
+  "fields": [
+    {
+        "name": "email",
+        "type": "string",
+        "doc": "The unique user email"
+    },
+    {
+        "name": "event",
+        "type": "string",
+        "doc": "An event that is performed with an account"
+    },
+    {
+        "name": "createdAt",
+        "type": "long",
+        "logicalType": "timestamp-millis",
+        "doc": "Event creation timestamp"
+    }
+  ]
+}
