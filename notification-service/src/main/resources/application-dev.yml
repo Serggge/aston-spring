@@ -1,0 +1,25 @@
+server:
+  port: 8082
+spring:
+  config:
+    activate:
+      on-profile: dev
+  mail:
+    host: smtp.mailbox.org
+    port: 587
+    username: admin
+    password: password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+kafka:
+  configuration:
+    bootstrap-servers:
+      - localhost:9092
+    group-id: mail-sender
+    client-id: app-one
+    topics: mail-notification

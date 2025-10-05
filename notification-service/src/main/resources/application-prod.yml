@@ -1,0 +1,26 @@
+server:
+  port: 8082
+spring:
+  config:
+    activate:
+      on-profile: prod
+  mail:
+    host: ${SMTP_SERVER}
+    port: ${SMTP_PORT}
+    username: {MAILBOX_USER}
+    password: {MAILBOX_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+kafka:
+  configuration:
+    bootstrap-servers:
+      - ${FIRST_BROKER_URL}
+      - ${SECOND_BROKER_URL}
+    group-id: ${BROKER_GROUP_ID}
+    client-id: ${BROKER_CLIENT_ID}
+    topics: ${BROKER_TOPIC_NAME}
