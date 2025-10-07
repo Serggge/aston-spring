@@ -1,37 +1,51 @@
 package ru.serggge.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.serggge.entity.Mail;
 import ru.serggge.model.EmailMessage;
 import ru.serggge.model.Event;
-import ru.serggge.properties.MailProperties;
-import java.time.LocalDateTime;
+import ru.serggge.repository.MailRepository;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class MailServiceImpl implements MailService {
 
-    private static final String SUBJECT = "Информация о действии вашего аккаунта на сайте Aston";
-    private final JavaMailSender mailSender;
-    private final MailProperties mailProperties;
+    private final MailRepository mailRepository;
 
     @Override
-    public void send(EmailMessage message) {
-        SimpleMailMessage messageToSend = new SimpleMailMessage();
-        messageToSend.setFrom(mailProperties.getUsername());
-        messageToSend.setTo(message.email());
-        messageToSend.setSubject(SUBJECT);
-        String messageBody = prepareMessageBody(message.event());
-        messageToSend.setText(messageBody);
-//        mailSender.send(messageToSend);
-        log.info("Email sent successfully to {} at {}", message.email(), LocalDateTime.now());
+    @Transactional
+    public Mail saveMessage(EmailMessage message) {
+        String messageText = prepareMessageTemplate(message.event());
+        Mail mail = new Mail(message.email(), messageText, message.createdAt());
+        return mailRepository.save(mail);
     }
 
-    private String prepareMessageBody(Event event) {
+    @Override
+    @Transactional
+    public List<Mail> getAll(String mail, int page, int pageSize) {
+        Sort sorting = Sort.by(Sort.Direction.ASC, "receivedAt");
+        Pageable pageRequest = PageRequest.of(page, pageSize, sorting);
+        Slice<Mail> mails = mailRepository.findByMail(mail.toLowerCase(), pageRequest);
+        if (mails.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            List<Long> ids = mails.stream()
+                                  .map(Mail::getId)
+                                  .toList();
+            mailRepository.markAsDelivered(ids);
+            return mails.getContent();
+        }
+    }
+
+    private String prepareMessageTemplate(Event event) {
         return switch (event) {
             case CREATE -> "Здравствуйте!\nВаш аккаунт на сайте <Aston> был успешно создан.";
             case UPDATE -> "Здравствуйте!\nВаш аккаунт на сайте <Aston> был обновлён.";

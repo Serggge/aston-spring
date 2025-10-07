@@ -19,10 +19,14 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+#  kafka:
+#    bootstrap-servers:
+#      - localhost:29092
+
 kafka:
   configuration:
     bootstrap-servers:
-      - localhost:9092
+      - localhost:29092
     topic-name: email-notification
     scheduled: 10000
 

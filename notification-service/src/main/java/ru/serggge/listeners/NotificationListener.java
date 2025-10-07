@@ -37,7 +37,7 @@ public class NotificationListener {
                 event.email(),
                 Event.valueOf(event.event()),
                 Instant.ofEpochMilli(event.createdAt()));
-        mailService.send(message);
+        mailService.saveMessage(message);
     }
 
     @DltHandler

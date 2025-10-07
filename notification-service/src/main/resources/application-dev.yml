@@ -4,6 +4,20 @@ spring:
   config:
     activate:
       on-profile: dev
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:testdb2
+    username: sa
+    password: sa
+  h2:
+    console:
+      enabled: true
+  sql:
+    init:
+      mode: always
+  jpa:
+    hibernate:
+      ddl-auto: none
   mail:
     host: smtp.mailbox.org
     port: 587
@@ -22,4 +36,5 @@ kafka:
       - localhost:9092
     group-id: mail-sender
     client-id: app-one
-    topics: mail-notification
+    topics: email-notification
+

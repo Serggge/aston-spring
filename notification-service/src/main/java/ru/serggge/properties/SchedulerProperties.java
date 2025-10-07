@@ -4,13 +4,11 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@ConfigurationProperties(prefix = "spring.mail")
 @Component
+@ConfigurationProperties(prefix = "scheduling.configuration")
 @Data
-public class MailProperties {
+public class SchedulerProperties {
 
-    private String host;
-    private String port;
-    private String username;
-    private String password;
+    private boolean enabled;
+    private long delay;
 }

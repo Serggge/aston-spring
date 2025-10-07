@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-shedlock
+      author: serggge
+      labels: shedlock-create
+      comment: create table shedlock
+      changes:
+        - createTable:
+            tableName: shedlock
+            columns:
+              - column:
+                  name: name
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lock_until
+                  type: timestamp(3)
+              - column:
+                  name: locked_at
+                  type: timestamp(3)
+              - column:
+                  name: locked_by
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
