@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.*;
-import org.springframework.kafka.retrytopic.DltStrategy;
 import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
 import org.springframework.stereotype.Component;
 import org.springframework.retry.annotation.Backoff;
@@ -16,20 +15,18 @@ import java.net.SocketTimeoutException;
 import java.time.Instant;
 
 @Component
-@KafkaListener(topics = "${kafka.configuration.topics}", groupId = "${kafka.configuration.group-id}")
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationListener {
 
     private final MailService mailService;
 
-    @KafkaHandler
     @RetryableTopic(
-            backoff = @Backoff(delay = 1000L, multiplier = 2, maxDelay = 5000L),
+            backoff = @Backoff(delay = 1000, multiplier = 2),
             attempts = "3",
-            topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
-            dltStrategy = DltStrategy.ALWAYS_RETRY_ON_ERROR,
-            include = SocketTimeoutException.class, exclude = NullPointerException.class)
+            autoCreateTopics = "false",
+            exclude = NullPointerException.class)
+    @KafkaListener(topics = "${kafka.configuration.topics}", groupId = "${kafka.configuration.group-id}")
     public void handle(ConsumerRecord<String, AccountEvent> record) {
         log.info("Message received: {}, from topic: {}, partition: {}", record, record.topic(), record.partition());
         AccountEvent event = record.value();

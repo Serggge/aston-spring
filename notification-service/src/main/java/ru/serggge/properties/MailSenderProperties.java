@@ -13,4 +13,5 @@ public class MailSenderProperties {
     private String port;
     private String username;
     private String password;
+    private int batchSize;
 }

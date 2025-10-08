@@ -5,10 +5,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "scheduling.configuration")
+@ConfigurationProperties(prefix = "scheduler")
 @Data
 public class SchedulerProperties {
 
     private boolean enabled;
-    private long delay;
+    private int batchSize;
+    private String delay;
+    private String lockAtLeastFor;
+    private String lockAtMostFor;
 }

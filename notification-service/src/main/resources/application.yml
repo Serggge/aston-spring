@@ -19,4 +19,4 @@ management:
 
 scheduler:
   enabled: true
-  delay: 5000
+  delay: 100

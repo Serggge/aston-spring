@@ -23,20 +23,20 @@ import java.util.Map;
 @Slf4j
 public class KafkaProducerConfig {
 
-    private final KafkaProducerProperties properties;
+    private final KafkaProducerProperties producerProps;
 
     @Bean
     public CommandLineRunner CommandLineRunnerBean() {
         return (args) -> {
-            log.info("BOOSTRAP SERVERS: {}", properties.getBootstrapServers());
+            log.info("BOOSTRAP SERVERS: {}", producerProps.getBootstrapServers());
         };
     }
 
     @Bean
     public NewTopic topic() {
-        return TopicBuilder.name(properties.getTopicName())
-                           .partitions(2)
-                           .replicas(2)
+        return TopicBuilder.name(producerProps.getTopicName())
+                           .partitions(producerProps.getPartitions())
+                           .replicas(producerProps.getPartitions())
                            .build();
     }
 
@@ -52,7 +52,7 @@ public class KafkaProducerConfig {
 
     private Map<String, Object> senderProps() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerProps.getBootstrapServers());
         props.put(ProducerConfig.ACKS_CONFIG, "all");
         props.put(ProducerConfig.CLIENT_ID_CONFIG, "user-service");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

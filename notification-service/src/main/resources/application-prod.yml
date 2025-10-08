@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: ${SERVER_PORT}
 spring:
   config:
     activate:
@@ -17,8 +17,8 @@ spring:
   mail:
     host: ${SMTP_SERVER}
     port: ${SMTP_PORT}
-    username: {MAILBOX_USER}
-    password: {MAILBOX_PASSWORD}
+    username: ${MAILBOX_USER}
+    password: ${MAILBOX_PASSWORD}
     properties:
       mail:
         smtp:
@@ -34,3 +34,10 @@ kafka:
     group-id: ${BROKER_GROUP_ID}
     client-id: ${BROKER_CLIENT_ID}
     topics: ${BROKER_TOPIC_NAME}
+
+scheduler:
+  enabled: true
+  delay: PT1M
+  batchSize: 20
+  lockAtLeastFor: PT1M
+  lockAtMostFor: PT5M

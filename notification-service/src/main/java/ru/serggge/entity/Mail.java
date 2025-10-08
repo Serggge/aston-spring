@@ -1,29 +1,22 @@
 package ru.serggge.entity;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
+import java.io.Serializable;
 import java.time.Instant;
 
-@Entity
-@Table(name = "mails")
-@NoArgsConstructor
-@Getter
-public class Mail {
+@RedisHash("Mail")
+@Data
+public class Mail implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(length = 64, nullable = false)
+    private String id;
     private String email;
-    @Column(length = 2000, nullable = false)
     private String message;
-    @Column(name = "received_at", nullable = false, updatable = false)
+    @Indexed
     private Instant receivedAt;
-    @Column(name = "delivered", insertable = false)
-    @Setter
-    private boolean isDelivered;
 
     public Mail(String email, String message, Instant receivedAt) {
         this.email = email;

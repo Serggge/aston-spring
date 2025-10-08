@@ -18,14 +18,13 @@ import javax.sql.DataSource;
 @ConditionalOnProperty(name = "scheduler.enabled", matchIfMissing = true)
 public class SchedulerConfig {
 
-    @Bean
-    @Profile("dev")
-    public LockProvider lockProvider(DataSource dataSource) {
-        return new JdbcTemplateLockProvider(dataSource);
-    }
+//    @Bean
+//    @Profile("dev")
+//    public LockProvider lockProvider(DataSource dataSource) {
+//        return new JdbcTemplateLockProvider(dataSource);
+//    }
 
     @Bean
-    @Profile("prod")
     public LockProvider lockProvider(RedisConnectionFactory connectionFactory) {
         return new RedisLockProvider(connectionFactory);
     }

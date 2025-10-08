@@ -31,9 +31,3 @@ databaseChangeLog:
                   defaultValueComputed: current_timestamp
                   constraints:
                     nullable: false
-              - column:
-                  name: active
-                  type: boolean
-                  defaultValue: "true"
-                  constraints:
-                    nullable: false

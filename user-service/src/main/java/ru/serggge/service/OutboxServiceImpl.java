@@ -6,8 +6,6 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import ru.serggge.config.properties.KafkaProducerProperties;
 import ru.serggge.entity.OutboxEvent;
 import ru.serggge.model.AccountEvent;
@@ -25,16 +23,14 @@ public class OutboxServiceImpl implements OutboxService {
     private final KafkaProducerProperties kafkaProperties;
 
     @Override
-    @Scheduled(fixedRateString = "${kafka.configuration.scheduled}")
-    @Transactional
+    @Scheduled(fixedRateString = "${scheduler.delay}")
     public void eventProcessing() {
-        outboxRepository.findUnsentEvents()
+        outboxRepository.findAllNonBlocked()
                         .stream()
                         .map(this::mapToAccountEvent)
                         .forEach(this::sendEvent);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
     private void sendEvent(Map.Entry<Long, AccountEvent> entry) {
         kafkaTemplate.send(kafkaProperties.getTopicName(),
                              entry.getValue().email(),
@@ -43,7 +39,7 @@ public class OutboxServiceImpl implements OutboxService {
                          RecordMetadata record = sendResult.getRecordMetadata();
                          printLog(entry.getValue(), record);
                      });
-        outboxRepository.markAsCompleted(entry.getKey());
+        outboxRepository.deleteById(entry.getKey());
     }
 
     private Map.Entry<Long, AccountEvent> mapToAccountEvent(OutboxEvent outboxEvent) {
