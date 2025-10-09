@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-mail
+      author: serggge
+      labels: mail-create
+      comment: create table mail
+      changes:
+        - createTable:
+            tableName: mail
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: message
+                  type: varchar(2000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: received_at
+                  type: timestamp
+                  constraints:
+                    nullable: false

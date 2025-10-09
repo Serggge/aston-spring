@@ -1,7 +1,7 @@
 package ru.serggge.mappers;
 
 import org.springframework.stereotype.Component;
-import ru.serggge.dto.FindEmailResponseDto;
+import ru.serggge.dto.SendMailResponseDto;
 import ru.serggge.dto.SendMailRequestDto;
 import ru.serggge.entity.Mail;
 import ru.serggge.model.EmailMessage;
@@ -15,14 +15,15 @@ import java.util.List;
 @Component
 public class MailMapper {
 
-    public FindEmailResponseDto mapToResponseDto(Mail mail) {
-        return new FindEmailResponseDto(
+    public SendMailResponseDto mapToResponseDto(Mail mail) {
+        return new SendMailResponseDto(
+                mail.getId().toString(),
                 mail.getEmail(),
                 mail.getMessage(),
                 LocalDateTime.ofInstant(mail.getReceivedAt(), ZoneId.systemDefault()));
     }
 
-    public List<FindEmailResponseDto> mapToResponseDto(Collection<Mail> mails) {
+    public List<SendMailResponseDto> mapToResponseDto(Collection<Mail> mails) {
         return mails.stream()
                     .map(this::mapToResponseDto)
                     .toList();

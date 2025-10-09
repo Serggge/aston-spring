@@ -10,6 +10,7 @@ import ru.serggge.properties.SchedulerProperties;
 import ru.serggge.repository.MailRepository;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class InboxServiceImpl implements InboxService {
     public void eventProcessing() {
         if (schedulerProps.isEnabled()) {
             Pageable batch = PageRequest.of(0, schedulerProps.getBatchSize());
-            List<String> sentMailIds = new LinkedList<>();
+            List<UUID> sentMailIds = new LinkedList<>();
             try {
                 mailRepository.findAll(batch)
                               .forEach(mail -> {

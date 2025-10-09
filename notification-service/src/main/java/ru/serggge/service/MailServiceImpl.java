@@ -24,9 +24,9 @@ public class MailServiceImpl implements MailService {
 
     private String prepareMessageTemplate(Event event) {
         return switch (event) {
-            case CREATE -> "Здравствуйте!\nВаш аккаунт на сайте <Aston> был успешно создан.";
-            case UPDATE -> "Здравствуйте!\nВаш аккаунт на сайте <Aston> был обновлён.";
-            case DELETE -> "Здравствуйте!\nВаш аккаунт был удалён.";
+            case CREATE -> "Здравствуйте! Ваш аккаунт на сайте <Aston> был успешно создан.";
+            case UPDATE -> "Здравствуйте! Ваш аккаунт на сайте <Aston> был обновлён.";
+            case DELETE -> "Здравствуйте! Ваш аккаунт был удалён.";
         };
     }
 }

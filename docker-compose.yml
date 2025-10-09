@@ -64,73 +64,75 @@ services:
       retries: 3
       start_period: 20s
 
-#
-#  notificationService1:
-#    build: ./notification-service/
-#    image: notification_service
-#    container_name: mailsender_primary
-#    ports:
-#      - "8082:8082"
-#    depends_on:
-#      - userService
-#    environment:
-#      SPRING_PROFILES_ACTIVE: prod
-#      SERVER_PORT: 8082
-#      FIRST_BROKER_URL: broker1:9092
-#      SECOND_BROKER_URL: broker1:9092
-#      BROKER_GROUP_ID: mail-sender
-#      BROKER_CLIENT_ID: first-app
-#      BROKER_TOPIC_NAME: email-notification
-#      SMTP_SERVER: smtp.mailbox.org
-#      SMTP_PORT: 471
-#      MAILBOX_USER: user
-#      MAILBOX_PASSWORD: password
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:8082" ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 3
-#      start_period: 20s
-#
-#
-#  notificationService2:
-#    image: notification_service
-#    container_name: mailsender_second
-#    ports:
-#      - "8083:8083"
-#    depends_on:
-#      - notificationService1
-#    environment:
-#      SPRING_PROFILES_ACTIVE: prod
-#      SERVER_PORT: 8083
-#      FIRST_BROKER_URL: broker1:9091
-#      SECOND_BROKER_URL: broker2:9091
-#      BROKER_GROUP_ID: mail-sender
-#      BROKER_CLIENT_ID: second-app
-#      BROKER_TOPIC_NAME: email-notification
-#      SMTP_SERVER: smtp.mailbox.org
-#      SMTP_PORT: 471
-#      MAILBOX_USER: user
-#      MAILBOX_PASSWORD: password
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:8083" ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 3
-#      start_period: 20s
 
-#  controller-1:
-#    image: apache/kafka-native:latest
-#    container_name: controller-1
-#    environment:
-#      KAFKA_NODE_ID: 1
-#      KAFKA_PROCESS_ROLES: controller
-#      KAFKA_LISTENERS: CONTROLLER://:9093
-#      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-#      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-#      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093
-#      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-#
+  notificationService1:
+    build: ./notification-service/
+    image: notification_service
+    container_name: mailsender_primary
+    ports:
+      - "8082:8082"
+    depends_on:
+      - userService
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8082
+      FIRST_BROKER_URL: broker1:9092
+      SECOND_BROKER_URL: broker1:9092
+      BROKER_GROUP_ID: mail-sender
+      BROKER_CLIENT_ID: first-app
+      BROKER_TOPIC_NAME: email-notification
+      SCHEMA_REGISTRY_URL: http://localhost:8081
+      SMTP_SERVER: smtp.mailbox.org
+      SMTP_PORT: 471
+      MAILBOX_USER: user
+      MAILBOX_PASSWORD: password
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+
+  notificationService2:
+    image: notification_service
+    container_name: mailsender_second
+    ports:
+      - "8083:8083"
+    depends_on:
+      - notificationService1
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8083
+      FIRST_BROKER_URL: broker1:9091
+      SECOND_BROKER_URL: broker2:9091
+      BROKER_GROUP_ID: mail-sender
+      BROKER_CLIENT_ID: second-app
+      BROKER_TOPIC_NAME: email-notification
+      SCHEMA_REGISTRY_URL: http://localhost:8081
+      SMTP_SERVER: smtp.mailbox.org
+      SMTP_PORT: 471
+      MAILBOX_USER: user
+      MAILBOX_PASSWORD: password
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  controller-1:
+    image: apache/kafka-native:latest
+    container_name: controller-1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_LISTENERS: CONTROLLER://:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller-1:9093,2@controller-2:9093
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
   controller-2:
     image: apache/kafka-native:latest
     container_name: controller-2

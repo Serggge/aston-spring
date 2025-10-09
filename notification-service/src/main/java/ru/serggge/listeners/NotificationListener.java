@@ -4,15 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.*;
-import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
 import org.springframework.stereotype.Component;
 import org.springframework.retry.annotation.Backoff;
 import ru.serggge.model.AccountEvent;
 import ru.serggge.model.EmailMessage;
 import ru.serggge.model.Event;
 import ru.serggge.service.MailService;
-import java.net.SocketTimeoutException;
-import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -33,7 +30,7 @@ public class NotificationListener {
         EmailMessage message = new EmailMessage(
                 event.getEmail(),
                 Event.valueOf(event.getEvent()),
-                Instant.ofEpochMilli(event.getCreatedAt()));
+                event.getCreatedAt());
         mailService.saveMessage(message);
     }
 

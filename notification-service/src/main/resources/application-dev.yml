@@ -4,13 +4,27 @@ spring:
   config:
     activate:
       on-profile: dev
-  data:
-    redis:
-      host: localhost
-      port: 6379
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:notif_testdb
+    username: sa
+    password: sa
+  h2:
+    console:
+      enabled: true
+  sql:
+    init:
+      mode: always
   jpa:
     hibernate:
       ddl-auto: none
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/master.yml
   mail:
     host: smtp.mailbox.org
     port: 587
@@ -23,18 +37,19 @@ spring:
           starttls:
             enable: true
 
+
 kafka:
   configuration:
     bootstrap-servers:
-      - localhost:29092
-      - localhost:39092
+      - localhost:9092
     group-id: mail-sender
-    client-id: app-one
+    client-id: notification-service
     topics: email-notification
+    sr-url: http://localhost:8081
 
 scheduler:
   enabled: true
   delay: PT10S
-  batchSize: 2
+  batchSize: 5
   lockAtLeastFor: PT10S
   lockAtMostFor: PT50S

@@ -16,10 +16,13 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
   private static final long serialVersionUID = -943809461182320459L;
 
 
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AccountEvent\",\"namespace\":\"ru.serggge.model\",\"fields\":[{\"name\":\"email\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"The unique user email\"},{\"name\":\"event\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"An event that is performed with an account\"},{\"name\":\"createdAt\",\"type\":\"long\",\"doc\":\"Event creation timestamp\",\"logicalType\":\"timestamp-millis\"}],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AccountEvent\",\"namespace\":\"ru.serggge.model\",\"fields\":[{\"name\":\"email\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"The unique user email\"},{\"name\":\"event\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"An event that is performed with an account\"},{\"name\":\"createdAt\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Event creation timestamp\"}],\"$schema\":\"http://json-schema.org/draft-07/schema#\"}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static final SpecificData MODEL$ = new SpecificData();
+  static {
+    MODEL$.addLogicalTypeConversion(new org.apache.avro.data.TimeConversions.TimestampMillisConversion());
+  }
 
   private static final BinaryMessageEncoder<AccountEvent> ENCODER =
       new BinaryMessageEncoder<>(MODEL$, SCHEMA$);
@@ -77,7 +80,7 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
   /** An event that is performed with an account */
   private java.lang.String event;
   /** Event creation timestamp */
-  private long createdAt;
+  private java.time.Instant createdAt;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -92,10 +95,10 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
    * @param event An event that is performed with an account
    * @param createdAt Event creation timestamp
    */
-  public AccountEvent(java.lang.String email, java.lang.String event, java.lang.Long createdAt) {
+  public AccountEvent(java.lang.String email, java.lang.String event, java.time.Instant createdAt) {
     this.email = email;
     this.event = event;
-    this.createdAt = createdAt;
+    this.createdAt = createdAt.truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
   }
 
   @Override
@@ -115,6 +118,19 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
     }
   }
 
+  private static final org.apache.avro.Conversion<?>[] conversions =
+      new org.apache.avro.Conversion<?>[] {
+      null,
+      null,
+      new org.apache.avro.data.TimeConversions.TimestampMillisConversion(),
+      null
+  };
+
+  @Override
+  public org.apache.avro.Conversion<?> getConversion(int field) {
+    return conversions[field];
+  }
+
   // Used by DatumReader.  Applications should not call.
   @Override
   @SuppressWarnings(value="unchecked")
@@ -122,7 +138,7 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
     switch (field$) {
     case 0: email = value$ != null ? value$.toString() : null; break;
     case 1: event = value$ != null ? value$.toString() : null; break;
-    case 2: createdAt = (java.lang.Long)value$; break;
+    case 2: createdAt = (java.time.Instant)value$; break;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -167,7 +183,7 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
    * Gets the value of the 'createdAt' field.
    * @return Event creation timestamp
    */
-  public long getCreatedAt() {
+  public java.time.Instant getCreatedAt() {
     return createdAt;
   }
 
@@ -177,8 +193,8 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
    * Event creation timestamp
    * @param value the value to set.
    */
-  public void setCreatedAt(long value) {
-    this.createdAt = value;
+  public void setCreatedAt(java.time.Instant value) {
+    this.createdAt = value.truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
   }
 
   /**
@@ -227,7 +243,7 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
     /** An event that is performed with an account */
     private java.lang.String event;
     /** Event creation timestamp */
-    private long createdAt;
+    private java.time.Instant createdAt;
 
     /** Creates a new Builder */
     private Builder() {
@@ -367,7 +383,7 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
       * Event creation timestamp
       * @return The value.
       */
-    public long getCreatedAt() {
+    public java.time.Instant getCreatedAt() {
       return createdAt;
     }
 
@@ -378,9 +394,9 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
       * @param value The value of 'createdAt'.
       * @return This builder.
       */
-    public ru.serggge.model.AccountEvent.Builder setCreatedAt(long value) {
+    public ru.serggge.model.AccountEvent.Builder setCreatedAt(java.time.Instant value) {
       validate(fields()[2], value);
-      this.createdAt = value;
+      this.createdAt = value.truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
       fieldSetFlags()[2] = true;
       return this;
     }
@@ -412,7 +428,7 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
         AccountEvent record = new AccountEvent();
         record.email = fieldSetFlags()[0] ? this.email : (java.lang.String) defaultValue(fields()[0]);
         record.event = fieldSetFlags()[1] ? this.event : (java.lang.String) defaultValue(fields()[1]);
-        record.createdAt = fieldSetFlags()[2] ? this.createdAt : (java.lang.Long) defaultValue(fields()[2]);
+        record.createdAt = fieldSetFlags()[2] ? this.createdAt : (java.time.Instant) defaultValue(fields()[2]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -440,51 +456,6 @@ public class AccountEvent extends org.apache.avro.specific.SpecificRecordBase im
     READER$.read(this, SpecificData.getDecoder(in));
   }
 
-  @Override protected boolean hasCustomCoders() { return true; }
-
-  @Override public void customEncode(org.apache.avro.io.Encoder out)
-    throws java.io.IOException
-  {
-    out.writeString(this.email);
-
-    out.writeString(this.event);
-
-    out.writeLong(this.createdAt);
-
-  }
-
-  @Override public void customDecode(org.apache.avro.io.ResolvingDecoder in)
-    throws java.io.IOException
-  {
-    org.apache.avro.Schema.Field[] fieldOrder = in.readFieldOrderIfDiff();
-    if (fieldOrder == null) {
-      this.email = in.readString();
-
-      this.event = in.readString();
-
-      this.createdAt = in.readLong();
-
-    } else {
-      for (int i = 0; i < 3; i++) {
-        switch (fieldOrder[i].pos()) {
-        case 0:
-          this.email = in.readString();
-          break;
-
-        case 1:
-          this.event = in.readString();
-          break;
-
-        case 2:
-          this.createdAt = in.readLong();
-          break;
-
-        default:
-          throw new java.io.IOException("Corrupt ResolvingDecoder.");
-        }
-      }
-    }
-  }
 }
 
 

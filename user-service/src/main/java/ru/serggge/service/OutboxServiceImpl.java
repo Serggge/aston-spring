@@ -46,7 +46,7 @@ public class OutboxServiceImpl implements OutboxService {
         AccountEvent accountEvent = new AccountEvent(
                 outboxEvent.getEmail(),
                 outboxEvent.getEvent().name(),
-                outboxEvent.getCreatedAt().toEpochMilli());
+                outboxEvent.getCreatedAt());
         return Map.entry(outboxEvent.getId(), accountEvent);
     }
 

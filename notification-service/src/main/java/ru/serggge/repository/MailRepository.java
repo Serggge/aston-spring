@@ -2,12 +2,11 @@ package ru.serggge.repository;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
 import ru.serggge.entity.Mail;
 import java.util.List;
+import java.util.UUID;
 
-@Repository
-public interface MailRepository extends CrudRepository<Mail, String> {
+public interface MailRepository extends CrudRepository<Mail, UUID> {
 
     List<Mail> findAll(Pageable page);
 

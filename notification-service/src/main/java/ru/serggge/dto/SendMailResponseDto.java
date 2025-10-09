@@ -7,8 +7,9 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class FindEmailResponseDto {
+public class SendMailResponseDto {
 
+    private String id;
     private String email;
     private String message;
     private LocalDateTime receivedAt;
