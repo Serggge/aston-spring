@@ -31,9 +31,9 @@ public class NotificationListener {
         log.info("Message received: {}, from topic: {}, partition: {}", record, record.topic(), record.partition());
         AccountEvent event = record.value();
         EmailMessage message = new EmailMessage(
-                event.email(),
-                Event.valueOf(event.event()),
-                Instant.ofEpochMilli(event.createdAt()));
+                event.getEmail(),
+                Event.valueOf(event.getEvent()),
+                Instant.ofEpochMilli(event.getCreatedAt()));
         mailService.saveMessage(message);
     }
 

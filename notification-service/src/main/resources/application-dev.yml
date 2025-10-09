@@ -26,7 +26,8 @@ spring:
 kafka:
   configuration:
     bootstrap-servers:
-      - localhost:9092
+      - localhost:29092
+      - localhost:39092
     group-id: mail-sender
     client-id: app-one
     topics: email-notification

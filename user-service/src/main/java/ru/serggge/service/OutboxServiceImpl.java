@@ -33,7 +33,7 @@ public class OutboxServiceImpl implements OutboxService {
 
     private void sendEvent(Map.Entry<Long, AccountEvent> entry) {
         kafkaTemplate.send(kafkaProperties.getTopicName(),
-                             entry.getValue().email(),
+                             entry.getValue().getEmail(),
                              entry.getValue())
                      .thenAccept(sendResult -> {
                          RecordMetadata record = sendResult.getRecordMetadata();
