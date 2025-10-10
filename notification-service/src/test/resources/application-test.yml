@@ -1,0 +1,38 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+  mail:
+    host: smtp.google.com
+    port: 447
+    username: serggge
+    password: password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+kafka:
+  configuration:
+    group-id: mail-sender
+    client-id: notification-service
+    topics: email-notification
+    sr-url: http://localhost:8081
+
+scheduler:
+  enabled: true
+  delay: PT1S
+  batchSize: 20
+  lockAtLeastFor: PT1S
+  lockAtMostFor: PT5S
+
+testcontainers:
+  reuse:
+    enable: true

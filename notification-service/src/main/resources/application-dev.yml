@@ -4,27 +4,15 @@ spring:
   config:
     activate:
       on-profile: dev
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
-  datasource:
-    driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:notif_testdb
-    username: sa
-    password: sa
-  h2:
-    console:
-      enabled: true
-  sql:
-    init:
-      mode: always
-  jpa:
-    hibernate:
-      ddl-auto: none
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/master.yml
+
   mail:
     host: smtp.mailbox.org
     port: 587

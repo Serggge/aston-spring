@@ -122,7 +122,7 @@ services:
       start_period: 20s
 
   controller-1:
-    image: apache/kafka-native:latest
+    image: apache/kafka-native:4.1.0
     container_name: controller-1
     environment:
       KAFKA_NODE_ID: 1
@@ -134,7 +134,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   controller-2:
-    image: apache/kafka-native:latest
+    image: apache/kafka-native:4.1.0
     container_name: controller-2
     environment:
       KAFKA_NODE_ID: 2
@@ -146,7 +146,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   broker-1:
-    image: apache/kafka-native:latest
+    image: apache/kafka-native:4.1.0
     container_name: broker-1
     ports:
       - 29092:9092
@@ -172,7 +172,7 @@ services:
       start_period: 15s
 #
   broker-2:
-    image: apache/kafka-native:latest
+    image: apache/kafka-native:4.1.0
     container_name: broker-2
     ports:
       - 39092:9092
@@ -197,17 +197,17 @@ services:
       retries: 3
       start_period: 15s
 
-  kafka-ui:
-    container_name: kafka_ui
-    hostname: kafka_ui
-    image: provectuslabs/kafka-ui:latest
-    depends_on:
-      - broker1
-      - broker2
-    ports:
-      - "8070:8080"
-    environment:
-      DYNAMIC_CONFIG_ENABLED: true
+#  kafka-ui:
+#    container_name: kafka_ui
+#    hostname: kafka_ui
+#    image: provectuslabs/kafka-ui:latest
+#    depends_on:
+#      - broker1
+#      - broker2
+#    ports:
+#      - "8070:8080"
+#    environment:
+#      DYNAMIC_CONFIG_ENABLED: true
 
   schema-registry:
     image: confluentinc/cp-schema-registry:8.0.1
