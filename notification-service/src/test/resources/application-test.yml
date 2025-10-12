@@ -2,11 +2,6 @@ spring:
   config:
     activate:
       on-profile: test
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
   mail:
     host: smtp.google.com
     port: 447
@@ -19,19 +14,30 @@ spring:
           starttls:
             enable: true
 
+  kafka:
+    producer:
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    consumer:
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+    properties:
+      schema.registry.url: mock://test
+      specific.avro.reader: true
+
 kafka:
   configuration:
     group-id: mail-sender
-    client-id: notification-service
     topics: email-notification
-    sr-url: http://localhost:8081
 
 scheduler:
-  enabled: true
+  enabled: false
   delay: PT1S
   batchSize: 20
   lockAtLeastFor: PT1S
   lockAtMostFor: PT5S
+
+images:
+  kafka: apache/kafka-native:4.1.0
+  redis: redis:8.2.2-alpine
 
 testcontainers:
   reuse:

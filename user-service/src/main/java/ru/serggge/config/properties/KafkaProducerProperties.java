@@ -13,4 +13,5 @@ public class KafkaProducerProperties {
     private List<String> bootstrapServers;
     private String topicName;
     private int partitions;
+    private String srUrl;
 }

@@ -56,6 +56,7 @@ services:
       FIRST_BROKER_URL: broker1:9091
       SECOND_BROKER_URL: broker2:9091
       TOPIC_NOTIFICATION_NAME: email-notification
+      SCHEMA_REGISTRY_URL: http://localhost:8081
       SCHEDULER_DELAY: 5000
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080" ]

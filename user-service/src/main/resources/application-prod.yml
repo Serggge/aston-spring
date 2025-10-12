@@ -27,6 +27,7 @@ kafka:
       - ${SECOND_BROKER_URL}
     topic-name: ${TOPIC_NOTIFICATION_NAME}
     partitions: 2
+    srUrl: ${SCHEMA_REGISTRY_URL}
 
 scheduler:
   delay: ${SCHEDULER_DELAY}

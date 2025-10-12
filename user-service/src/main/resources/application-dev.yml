@@ -28,6 +28,7 @@ kafka:
       - localhost:39092
     topic-name: email-notification
     partitions: 1
+    srUrl: http://localhost:8081
 
 scheduler:
   delay: 3000

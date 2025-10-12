@@ -11,23 +11,29 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.serggge.config.TestConfig;
+import ru.serggge.config.KafkaConsumer;
+import ru.serggge.config.UserServiceTestConfig;
 import ru.serggge.dto.CreateUserRequestDto;
 import ru.serggge.dto.FindUserResponseDto;
 import ru.serggge.dto.UpdateUserRequestDto;
+import ru.serggge.entity.OutboxEvent;
 import ru.serggge.entity.User;
+import ru.serggge.model.Event;
+import ru.serggge.repository.OutboxRepository;
 import ru.serggge.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -41,22 +47,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
-@Import(TestConfig.class)
+@Import(UserServiceTestConfig.class)
+@ActiveProfiles("test")
 @Testcontainers
 @Transactional
 @Sql(scripts = "/sql_script/test_schema.sql", executionPhase = BEFORE_TEST_CLASS,
         config = @SqlConfig(encoding = "utf-8", transactionMode = SqlConfig.TransactionMode.ISOLATED))
-public class UserControllerApplicationTest {
+@DirtiesContext
+@EmbeddedKafka(partitions = 1, topics = "${kafka.configuration.topic-name}", kraft = true)
+public class UserServiceE2ETest {
 
     @Autowired
     MockMvc mockMvc;
     @Autowired
     ObjectMapper objectMapper;
     @Autowired
-    @Container
-    PostgreSQLContainer<?> postgres;
-    @Autowired
     UserRepository userRepository;
+    @Autowired
+    OutboxRepository outboxRepository;
+    @Autowired
+    KafkaConsumer kafkaConsumer;
+
 
     @Test
     @DisplayName("Create new - success")
@@ -445,6 +456,47 @@ public class UserControllerApplicationTest {
         Optional<User> checkedUser = userRepository.findById(userId);
 
         assertTrue(checkedUser.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Kafka sending message")
+    @SneakyThrows
+    void sendingMessageToKafka() {
+        // given
+        final String email = "john@email.org";
+        final OutboxEvent event = new OutboxEvent(Event.CREATE, email);
+
+        // when
+        outboxRepository.save(event);
+
+        // then
+        boolean messageConsumed = kafkaConsumer.getLatch().await(10, TimeUnit.SECONDS);
+        assertThat(messageConsumed, is(true));
+        assertThat(kafkaConsumer.getPayload(), containsString(email));
+    }
+
+    @Test
+    @DisplayName("Outbox event saved")
+    @SneakyThrows
+    void outboxEventSavedToDatabase() {
+        // given
+        final String username = generateUserName();
+        final String email = generateEmail(username);
+        final int age = generateAge();
+        final CreateUserRequestDto request = new CreateUserRequestDto(username, email, age);
+        final String json = objectMapper.writeValueAsString(request);
+
+        mockMvc
+                .perform(post("/users")
+                        .contentType(APPLICATION_JSON)
+                        .content(json)
+                        .accept(APPLICATION_JSON));
+
+        // when
+        List<OutboxEvent> events = outboxRepository.findAllNonBlocked();
+
+        // then
+        assertThat(events.size(), is(1));
     }
 
     String generateUserName() {

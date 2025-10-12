@@ -14,9 +14,9 @@ public class Mail implements Serializable {
 
     @Id
     private UUID id;
+    @Indexed
     private String email;
     private String message;
-    @Indexed
     private Instant receivedAt;
 
     public Mail(String email, String message, Instant receivedAt) {
