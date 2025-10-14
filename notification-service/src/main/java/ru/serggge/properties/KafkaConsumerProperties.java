@@ -14,5 +14,6 @@ public class KafkaConsumerProperties {
     private List<String> bootstrapServers;
     private String groupId;
     private String clientId;
+    private String srUrl;
 
 }

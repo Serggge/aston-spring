@@ -1,5 +1,7 @@
 package ru.serggge.config;
 
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -8,37 +10,36 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 import ru.serggge.config.properties.KafkaProducerProperties;
 import ru.serggge.model.AccountEvent;
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EnableKafka
 @RequiredArgsConstructor
 @Slf4j
+@Profile("!test")
 public class KafkaProducerConfig {
 
-    private final KafkaProducerProperties properties;
+    private final KafkaProducerProperties producerProps;
 
     @Bean
     public CommandLineRunner CommandLineRunnerBean() {
         return (args) -> {
-            log.info("BOOSTRAP SERVERS: {}", properties.getBootstrapServers());
+            log.info("BOOSTRAP SERVERS: {}", producerProps.getBootstrapServers());
         };
     }
 
     @Bean
     public NewTopic topic() {
-        return TopicBuilder.name(properties.getTopicName())
-                           .partitions(2)
-                           .replicas(2)
+        return TopicBuilder.name(producerProps.getTopicName())
+                           .partitions(producerProps.getPartitions())
+                           .replicas(producerProps.getPartitions())
                            .build();
     }
 
@@ -54,18 +55,12 @@ public class KafkaProducerConfig {
 
     private Map<String, Object> senderProps() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
-        props.put(ProducerConfig.BATCH_SIZE_CONFIG, "100000");
-        props.put(ProducerConfig.LINGER_MS_CONFIG, "500");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerProps.getBootstrapServers());
         props.put(ProducerConfig.ACKS_CONFIG, "all");
-        props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, "500");
-        props.put(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, "1000");
-        props.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "1000");
-        props.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, "5000");
         props.put(ProducerConfig.CLIENT_ID_CONFIG, "user-service");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        props.put(JsonSerializer.TYPE_MAPPINGS, "event:ru.serggge.model.AccountEvent");
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+        props.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, producerProps.getSrUrl());
         return props;
     }
 }

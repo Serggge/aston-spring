@@ -1,0 +1,44 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  mail:
+    host: smtp.google.com
+    port: 447
+    username: serggge
+    password: password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  kafka:
+    producer:
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    consumer:
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+    properties:
+      schema.registry.url: mock://test
+      specific.avro.reader: true
+
+kafka:
+  configuration:
+    group-id: mail-sender
+    topics: email-notification
+
+scheduler:
+  enabled: false
+  delay: PT1S
+  batchSize: 20
+  lockAtLeastFor: PT1S
+  lockAtMostFor: PT5S
+
+images:
+  kafka: apache/kafka-native:4.1.0
+  redis: redis:8.2.2-alpine
+
+testcontainers:
+  reuse:
+    enable: true

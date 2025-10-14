@@ -4,6 +4,15 @@ spring:
   config:
     activate:
       on-profile: dev
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/master.yml
+
   mail:
     host: smtp.mailbox.org
     port: 587
@@ -16,10 +25,19 @@ spring:
           starttls:
             enable: true
 
+
 kafka:
   configuration:
     bootstrap-servers:
       - localhost:9092
     group-id: mail-sender
-    client-id: app-one
-    topics: mail-notification
+    client-id: notification-service
+    topics: email-notification
+    sr-url: http://localhost:8081
+
+scheduler:
+  enabled: true
+  delay: PT10S
+  batchSize: 5
+  lockAtLeastFor: PT10S
+  lockAtMostFor: PT50S

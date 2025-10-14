@@ -1,24 +1,18 @@
 databaseChangeLog:
   - changeSet:
-      id: create-table-outbox
+      id: create-table-mail
       author: serggge
-      labels: outbox-create
-      comment: create table outbox event
+      labels: mail-create
+      comment: create table mail
       changes:
         - createTable:
-            tableName: outbox_event
+            tableName: mail
             columns:
               - column:
                   name: id
-                  type: bigint
-                  autoIncrement: true
+                  type: UUID
                   constraints:
                     primaryKey: true
-                    nullable: false
-              - column:
-                  name: event
-                  type: varchar(64)
-                  constraints:
                     nullable: false
               - column:
                   name: email
@@ -26,8 +20,12 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: created_at
+                  name: message
+                  type: varchar(2000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: received_at
                   type: timestamp
-                  defaultValueComputed: current_timestamp
                   constraints:
                     nullable: false

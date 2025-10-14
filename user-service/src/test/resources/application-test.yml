@@ -1,7 +1,7 @@
 spring:
   datasource:
     driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:userServiceDb
     username: sa
     password: sa
   jpa:
@@ -11,10 +11,19 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/master.yml
 
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    consumer:
+      auto-offset-reset: earliest
+
 kafka:
   configuration:
-    bootstrap-servers:
-      - localhost:9092
-      - localhost:9093
     topic-name: email-notification
-    scheduled: 10000
+
+scheduler:
+  delay: 1000
+
+images:
+  postgres: postgres:18.0-alpine

@@ -7,10 +7,11 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "spring.mail")
 @Component
 @Data
-public class MailProperties {
+public class MailSenderProperties {
 
     private String host;
     private String port;
     private String username;
     private String password;
+    private int batchSize;
 }

@@ -1,8 +1,10 @@
 package ru.serggge.service;
 
+import ru.serggge.entity.Mail;
 import ru.serggge.model.EmailMessage;
 
 public interface MailService {
 
-    void send(EmailMessage message);
+    Mail saveMessage(EmailMessage message);
+
 }
