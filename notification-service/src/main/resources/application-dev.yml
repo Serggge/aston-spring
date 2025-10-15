@@ -4,6 +4,7 @@ spring:
   config:
     activate:
       on-profile: dev
+
   data:
     redis:
       host: localhost
@@ -25,11 +26,11 @@ spring:
           starttls:
             enable: true
 
-
 kafka:
   configuration:
     bootstrap-servers:
-      - localhost:9092
+      - localhost:29092
+      - localhost:39092
     group-id: mail-sender
     client-id: notification-service
     topics: email-notification
@@ -41,3 +42,8 @@ scheduler:
   batchSize: 5
   lockAtLeastFor: PT10S
   lockAtMostFor: PT50S
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

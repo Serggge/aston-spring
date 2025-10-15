@@ -9,7 +9,6 @@
 
     <artifactId>user-service</artifactId>
     <packaging>jar</packaging>
-
     <name>user-service</name>
 
     <properties>
@@ -77,6 +76,14 @@
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-avro-serializer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -153,6 +160,7 @@
             <plugin>
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro-maven-plugin</artifactId>
+                <version>1.12.0</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>

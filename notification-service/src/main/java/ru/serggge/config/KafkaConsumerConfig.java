@@ -4,8 +4,11 @@ import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -13,6 +16,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaAdmin;
 import ru.serggge.model.AccountEvent;
 import ru.serggge.properties.KafkaConsumerProperties;
 import java.util.HashMap;
@@ -22,9 +26,17 @@ import java.util.Map;
 @EnableKafka
 @Profile("!test")
 @RequiredArgsConstructor
+@Slf4j
 public class KafkaConsumerConfig {
 
     private final KafkaConsumerProperties kafkaProperties;
+
+    @Bean
+    public CommandLineRunner CommandLineRunnerBean() {
+        return (args) -> {
+            log.info("BOOSTRAP SERVERS: {}", kafkaProperties.getBootstrapServers());
+        };
+    }
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, AccountEvent>
@@ -33,6 +45,14 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         return factory;
+    }
+
+    @Bean
+    public KafkaAdmin kafkaAdmin() {
+        Map<String, Object> adminProps = new HashMap<>();
+        adminProps.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+        adminProps.put(AdminClientConfig.CLIENT_ID_CONFIG, "admin-client");
+        return new KafkaAdmin(adminProps);
     }
 
     @Bean

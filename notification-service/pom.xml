@@ -9,9 +9,7 @@
 
     <artifactId>notification-service</artifactId>
     <packaging>jar</packaging>
-
     <name>notification-service</name>
-    <url>http://maven.apache.org</url>
 
     <properties>
     </properties>
@@ -81,6 +79,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>

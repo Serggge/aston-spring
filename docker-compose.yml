@@ -21,11 +21,8 @@ services:
   redis:
     image: redis:8.2.2-alpine
     container_name: redis
-    volumes:
-      - ./src/main/resources:/docker-entrypoint-initdb.d
-      - /var/lib/postgresql/data
     ports:
-      - "6543:5432"
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -57,6 +54,7 @@ services:
       SECOND_BROKER_URL: broker2:9091
       TOPIC_NOTIFICATION_NAME: email-notification
       SCHEMA_REGISTRY_URL: http://localhost:8081
+      EUREKA_URL: localhost:8761
       SCHEDULER_DELAY: 5000
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
@@ -83,6 +81,7 @@ services:
       BROKER_CLIENT_ID: first-app
       BROKER_TOPIC_NAME: email-notification
       SCHEMA_REGISTRY_URL: http://localhost:8081
+      EUREKA_URL: localhost:8761
       SMTP_SERVER: smtp.mailbox.org
       SMTP_PORT: 471
       MAILBOX_USER: user
@@ -111,6 +110,7 @@ services:
       BROKER_CLIENT_ID: second-app
       BROKER_TOPIC_NAME: email-notification
       SCHEMA_REGISTRY_URL: http://localhost:8081
+      EUREKA_URL: localhost:8761
       SMTP_SERVER: smtp.mailbox.org
       SMTP_PORT: 471
       MAILBOX_USER: user
@@ -224,6 +224,6 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker-1:19092,broker-2:19092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
-networks:
-  aston:
-    driver: bridge
+#networks:
+#  aston:
+#    driver: bridge

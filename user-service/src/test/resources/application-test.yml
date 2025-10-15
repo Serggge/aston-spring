@@ -10,13 +10,15 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/master.yml
-
   kafka:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
     consumer:
-      auto-offset-reset: earliest
+      auto-offset-reset: latest
+    properties:
+      schema.registry.url: mock://test
+      specific.avro.reader: true
 
 kafka:
   configuration:

@@ -27,13 +27,15 @@ public class OutboxServiceImpl implements OutboxService {
     public void eventProcessing() {
         outboxRepository.findAllNonBlocked()
                         .stream()
+                        .peek(event -> log.info("Prepare the message to sending: {}", event))
                         .map(this::mapToAccountEvent)
                         .forEach(this::sendEvent);
     }
 
     private void sendEvent(Map.Entry<Long, AccountEvent> entry) {
         kafkaTemplate.send(kafkaProperties.getTopicName(),
-                             entry.getValue().getEmail(),
+                             entry.getValue()
+                                  .getEmail(),
                              entry.getValue())
                      .thenAccept(sendResult -> {
                          RecordMetadata record = sendResult.getRecordMetadata();
@@ -45,7 +47,8 @@ public class OutboxServiceImpl implements OutboxService {
     private Map.Entry<Long, AccountEvent> mapToAccountEvent(OutboxEvent outboxEvent) {
         AccountEvent accountEvent = new AccountEvent(
                 outboxEvent.getEmail(),
-                outboxEvent.getEvent().name(),
+                outboxEvent.getEvent()
+                           .name(),
                 outboxEvent.getCreatedAt());
         return Map.entry(outboxEvent.getId(), accountEvent);
     }

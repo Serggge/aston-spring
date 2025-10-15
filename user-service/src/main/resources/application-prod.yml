@@ -31,3 +31,8 @@ kafka:
 
 scheduler:
   delay: ${SCHEDULER_DELAY}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_URL}/eureka/

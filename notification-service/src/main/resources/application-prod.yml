@@ -39,3 +39,8 @@ scheduler:
   batchSize: 20
   lockAtLeastFor: PT1M
   lockAtMostFor: PT5M
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_URL}/eureka/

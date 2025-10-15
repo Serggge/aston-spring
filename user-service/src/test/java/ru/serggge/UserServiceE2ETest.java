@@ -2,8 +2,8 @@ package ru.serggge;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.serggge.config.KafkaConsumer;
 import ru.serggge.config.UserServiceTestConfig;
@@ -50,9 +51,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(UserServiceTestConfig.class)
 @ActiveProfiles("test")
 @Testcontainers
-@Transactional
 @Sql(scripts = "/sql_script/test_schema.sql", executionPhase = BEFORE_TEST_CLASS,
         config = @SqlConfig(encoding = "utf-8", transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Transactional
 @DirtiesContext
 @EmbeddedKafka(partitions = 1, topics = "${kafka.configuration.topic-name}", kraft = true)
 public class UserServiceE2ETest {
@@ -68,6 +69,11 @@ public class UserServiceE2ETest {
     @Autowired
     KafkaConsumer kafkaConsumer;
 
+//    @BeforeEach
+//    void cleanUp() {
+//        userRepository.deleteAll();
+//        outboxRepository.deleteAll();
+//    }
 
     @Test
     @DisplayName("Create new - success")
@@ -470,7 +476,7 @@ public class UserServiceE2ETest {
         outboxRepository.save(event);
 
         // then
-        boolean messageConsumed = kafkaConsumer.getLatch().await(10, TimeUnit.SECONDS);
+        boolean messageConsumed = kafkaConsumer.getLatch().await(3, TimeUnit.SECONDS);
         assertThat(messageConsumed, is(true));
         assertThat(kafkaConsumer.getPayload(), containsString(email));
     }
@@ -497,6 +503,8 @@ public class UserServiceE2ETest {
 
         // then
         assertThat(events.size(), is(1));
+        OutboxEvent event = events.get(0);
+        assertThat(event.getEmail(), is(email));
     }
 
     String generateUserName() {

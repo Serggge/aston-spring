@@ -17,6 +17,9 @@
     <modules>
         <module>notification-service</module>
         <module>user-service</module>
+        <module>discovery-service</module>
+        <module>gateway-service</module>
+        <module>config-server</module>
     </modules>
 
     <properties>
@@ -26,6 +29,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.release>17</maven.compiler.release>
         <shedlock.version>6.10.0</shedlock.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
 	</properties>
 
     <repositories>
@@ -143,7 +147,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>2025.0.0</version>
+                <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -152,6 +156,11 @@
                 <artifactId>awaitility</artifactId>
                 <scope>test</scope>
                 <version>4.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>3.2.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
