@@ -20,27 +20,34 @@ public class OutboxServiceImpl implements OutboxService {
 
     private final KafkaTemplate<String, AccountEvent> kafkaTemplate;
     private final OutboxRepository outboxRepository;
+    private final RestSenderService restSenderService;
     private final KafkaProducerProperties kafkaProperties;
 
     @Override
     @Scheduled(fixedRateString = "${scheduler.delay}")
     public void eventProcessing() {
         outboxRepository.findAllNonBlocked()
-                        .stream()
-                        .peek(event -> log.info("Prepare the message to sending: {}", event))
-                        .map(this::mapToAccountEvent)
-                        .forEach(this::sendEvent);
+                .stream()
+                .peek(event -> log.info("Prepare the message to sending: {}", event))
+                .map(this::mapToAccountEvent)
+                .forEach(this::sendEvent);
     }
 
     private void sendEvent(Map.Entry<Long, AccountEvent> entry) {
-        kafkaTemplate.send(kafkaProperties.getTopicName(),
-                             entry.getValue()
-                                  .getEmail(),
-                             entry.getValue())
-                     .thenAccept(sendResult -> {
-                         RecordMetadata record = sendResult.getRecordMetadata();
-                         printLog(entry.getValue(), record);
-                     });
+        kafkaTemplate.send(
+                        kafkaProperties.getTopicName(),
+                        entry.getValue()
+                                .getEmail(),
+                        entry.getValue())
+                .whenComplete((sendResult, exception) -> {
+                    if (exception == null) {
+                        RecordMetadata record = sendResult.getRecordMetadata();
+                        printLogSuccess(entry.getValue(), record);
+                    } else {
+                        printLogFail(entry.getValue(), exception);
+                        restSenderService.sendEvent(entry.getValue());
+                    }
+                });
         outboxRepository.deleteById(entry.getKey());
     }
 
@@ -48,13 +55,19 @@ public class OutboxServiceImpl implements OutboxService {
         AccountEvent accountEvent = new AccountEvent(
                 outboxEvent.getEmail(),
                 outboxEvent.getEvent()
-                           .name(),
+                        .name(),
                 outboxEvent.getCreatedAt());
         return Map.entry(outboxEvent.getId(), accountEvent);
     }
 
-    private void printLog(AccountEvent event, RecordMetadata record) {
+    private void printLogSuccess(AccountEvent event, RecordMetadata record) {
         log.info("Event: {} successfully sent to topic: [{}] partition: [{}] at [{}]",
                 event, record.topic(), record.partition(), Instant.ofEpochMilli(record.timestamp()));
     }
+
+    private void printLogFail(AccountEvent event, Throwable exception) {
+        log.warn("Can't send the event: {} to broker by reason: {}. Event will send by REST",
+                event, exception.getMessage());
+    }
+
 }

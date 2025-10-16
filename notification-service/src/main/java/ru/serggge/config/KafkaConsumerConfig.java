@@ -51,7 +51,7 @@ public class KafkaConsumerConfig {
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> adminProps = new HashMap<>();
         adminProps.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
-        adminProps.put(AdminClientConfig.CLIENT_ID_CONFIG, "admin-client");
+        adminProps.put(AdminClientConfig.CLIENT_ID_CONFIG, "consumer-admin-client");
         return new KafkaAdmin(adminProps);
     }
 
