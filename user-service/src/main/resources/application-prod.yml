@@ -1,38 +1,6 @@
-server:
-  port: 8080
 spring:
   config:
-    activate:
-      on-profile: prod
-  datasource:
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-
-hibernate:
-  dialect: org.hibernate.dialect.PostgreSQLDialect
-  hbm2ddl:
-    auto: update
-
-swagger:
-  app-name: ${spring.application.name}
-  app-description: User Api Example
-  app-version: 1.0
-
-kafka:
-  configuration:
-    bootstrap-servers:
-      - ${FIRST_BROKER_URL}
-      - ${SECOND_BROKER_URL}
-    topic-name: ${TOPIC_NOTIFICATION_NAME}
-    partitions: 2
-    srUrl: ${SCHEMA_REGISTRY_URL}
-
-scheduler:
-  delay: ${SCHEDULER_DELAY}
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://${EUREKA_URL}/eureka/
+    import: optional:configserver:http://localhost:8888
+  cloud:
+    config:
+      fail-fast: true
