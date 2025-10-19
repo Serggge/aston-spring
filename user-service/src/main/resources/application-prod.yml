@@ -1,6 +1,25 @@
-spring:
-  config:
-    import: optional:configserver:http://localhost:8888
-  cloud:
-    config:
-      fail-fast: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics
+  endpoint:
+    prometheus:
+      access: read_only
+  metrics:
+    distribution.percentiles-histogram.http:
+      server.requests: true
+      client.requests: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+swagger:
+  app-name: user-service
+  app-description: User Api Example
+  app-version: 1.0

@@ -1,21 +1,24 @@
 spring:
   application:
-    name: user-service
+    name: notification-service
   profiles:
     active: dev
-  cloud:
-    config:
-      enabled: false
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/master.yml
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      fail-fast: true
+      discovery:
+        enabled: true
+        service-id: config-server
 
-management:
-  endpoint:
-    refresh:
-      enabled: true
-    scheduler:
-      roles: ACTUATOR
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL}
 
 scheduler:
   enabled: true

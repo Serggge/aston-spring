@@ -12,3 +12,9 @@ eureka:
 server:
   port: 8761
   shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

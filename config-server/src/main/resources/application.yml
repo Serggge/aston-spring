@@ -8,8 +8,9 @@ spring:
     config:
       server:
         git:
-          uri: file://${user.home}/dev/config-repo
-          searchPaths: '{application}'
+          uri: https://github.com/Serggge/config-repo
+          default-label: master
+          search-paths: "{application}"
 
 eureka:
   client:
