@@ -70,6 +70,7 @@ public class KafkaConsumerConfig {
         props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, "true");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, kafkaProperties.getSrUrl());
+        props.put(AbstractKafkaSchemaSerDeConfig.NORMALIZE_SCHEMAS, true);
         return props;
     }
 
