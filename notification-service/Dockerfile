@@ -1,3 +1,3 @@
 FROM amazoncorretto:17-alpine-jdk
 COPY target/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar","-Dspring.profiles.active=prod"]
+ENTRYPOINT ["java","-jar","/app.jar","--spring.profiles.active=prod"]

@@ -45,6 +45,25 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  gateway-service:
+    build: ./gateway-service/
+    image: gateway_service
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    environment:
+      EUREKA_URL: http://discovery-service:8761/eureka/
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -O /dev/null http://localhost:8080/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
   config-server:
     build: ./config-server/
     image: config-server
@@ -75,6 +94,13 @@ services:
         condition: service_healthy
     environment:
       EUREKA_URL: http://discovery-service:8761/eureka/
+#    healthcheck:
+#      test: [ "CMD-SHELL", "wget -O /dev/null http://localhost:8090/actuator/health || exit 1" ]
+#      interval: 10s
+#      timeout: 10s
+#      retries: 5
+#      start_period: 30s
+    restart: unless-stopped
 
   notificationService1:
     build: ./notification-service/
@@ -83,10 +109,12 @@ services:
     ports:
       - "8091:8091"
     depends_on:
-      - userService
+      user-service:
+        condition: service_started
     environment:
       SERVER_PORT: 8091
       EUREKA_URL: http://discovery-service:8761/eureka/
+    restart: unless-stopped
 
   notificationService2:
     image: notification_service
@@ -94,10 +122,12 @@ services:
     ports:
       - "8092:8092"
     depends_on:
-      - userService
+      user-service:
+        condition: service_started
     environment:
       SERVER_PORT: 8092
       EUREKA_URL: http://discovery-service:8761/eureka/
+    restart: unless-stopped
 
   controller-1:
     image: apache/kafka-native:4.1.0
