@@ -3,6 +3,7 @@ package ru.serggge.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.serggge.model.Event;
 import java.time.Instant;
@@ -11,6 +12,7 @@ import java.time.Instant;
 @Table(name = "outbox_event")
 @NoArgsConstructor
 @Getter
+@ToString
 public class OutboxEvent {
 
     @Id

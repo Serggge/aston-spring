@@ -1,11 +1,13 @@
 package ru.serggge.config;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import java.util.concurrent.CountDownLatch;
 
 @Data
+@Slf4j
 public class KafkaConsumer {
 
     private CountDownLatch latch = new CountDownLatch(1);
