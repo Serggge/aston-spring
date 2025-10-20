@@ -1,6 +1,6 @@
 package ru.serggge.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import java.time.Instant;
 
@@ -9,10 +9,15 @@ import java.time.Instant;
 @NoArgsConstructor
 public class CreateUserResponseDto {
 
+    @Schema(description = "Unique entity identifier", example = "1", format = "long")
     private long id;
+    @Schema(description = "User name", example = "John Doe")
     private String name;
+    @Schema(description = "Unique user email", example = "john@email.org", format = "email")
     private String email;
+    @Schema(description = "User age", example = "25", format = "integer")
     private Integer age;
+    @Schema(description = "Event creation time in epoch millis", example = "1323216465", format = "instant")
     private Instant createdAt;
 
 }
