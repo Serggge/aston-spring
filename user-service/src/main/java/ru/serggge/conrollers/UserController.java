@@ -1,6 +1,7 @@
 package ru.serggge.conrollers;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.serggge.dto.*;
 import ru.serggge.entity.User;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class UserController implements UserOperations {
 
     private final UserService service;
@@ -45,4 +47,5 @@ public class UserController implements UserOperations {
     public void delete(long userId) {
         service.removeUser(userId);
     }
+
 }

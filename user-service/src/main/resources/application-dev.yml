@@ -1,5 +1,5 @@
 server:
-  port: 8090
+  port: 8070
 spring:
   datasource:
     driverClassName: org.h2.Driver
@@ -22,9 +22,14 @@ spring:
     config:
       enabled: false
 
+resource-server:
+  jwk-set-uri: http://localhost:9000/oauth2/jwks
+
 eureka:
   client:
     enabled: false
+    service-url:
+      defaultZone: placeholder
 
 kafka:
   configuration:
@@ -42,6 +47,8 @@ hibernate:
   hbm2ddl:
     auto: validate
   dialect: org.hibernate.dialect.PostgreSQLDialect
+
+
 
 #management:
 #  endpoints:
