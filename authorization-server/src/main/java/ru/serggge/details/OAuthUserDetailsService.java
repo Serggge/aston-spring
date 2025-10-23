@@ -1,4 +1,4 @@
-package ru.serggge.security;
+package ru.serggge.details;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
@@ -13,17 +13,18 @@ import ru.serggge.repository.AccountRepository;
 @RequiredArgsConstructor
 public class OAuthUserDetailsService implements UserDetailsService {
 
-    private final AccountRepository userRepository;
+    private final AccountRepository accountRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        Account user = userRepository.findByLogin(username)
-                                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Account user = accountRepository.findByLogin(username)
+                                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return User.withUsername(user.getLogin())
                 .password(user.getPassword())
                 .authorities(user.getRole().name())
+                .accountLocked(user.isBlocked())
                 .build();
     }
 }

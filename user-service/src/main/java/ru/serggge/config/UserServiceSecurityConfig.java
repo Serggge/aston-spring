@@ -45,10 +45,11 @@ public class UserServiceSecurityConfig {
     private Converter<Jwt, AbstractAuthenticationToken> converter() {
         return jwt -> {
             Collection<?> rawAuthorities = (Collection<?>) jwt.getClaims()
-                                                              .getOrDefault("authorities", Collections.emptyList());
+                                                              .getOrDefault("roles", Collections.emptyList());
             Set<SimpleGrantedAuthority> grantedAuthorities = rawAuthorities
                     .stream()
                     .map(Object::toString)
+                    .map(authority -> String.join("_", "Role", authority))
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toSet());
 

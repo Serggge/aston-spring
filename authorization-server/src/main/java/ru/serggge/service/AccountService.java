@@ -4,5 +4,5 @@ import ru.serggge.entity.Account;
 
 public interface AccountService {
 
-    Account register(Account account);
+    void register(Account account);
 }

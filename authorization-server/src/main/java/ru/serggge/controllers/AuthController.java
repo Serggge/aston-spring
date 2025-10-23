@@ -1,5 +1,6 @@
 package ru.serggge.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +16,11 @@ public class AuthController {
     private final AccountService accountService;
     private final AccountMapper accountMapper;
 
-    @PostMapping("/signup")
+    @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void register(@RequestBody RegisterRequestDto requestDto) {
+    public void register(@RequestBody @Valid RegisterRequestDto requestDto) {
         Account newAccount = accountMapper.toEntity(requestDto);
-        Account registeredAccount = accountService.register(newAccount);
+        accountService.register(newAccount);
     }
+
 }
