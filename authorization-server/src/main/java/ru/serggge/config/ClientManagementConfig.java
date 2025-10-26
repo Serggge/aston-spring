@@ -26,8 +26,9 @@ public class ClientManagementConfig {
         RegisteredClient gateway = gatewayClient();
         RegisteredClient userService = userServiceClient();
         RegisteredClient mailService = mailServiceClient();
+        RegisteredClient postman = postmanClient();
 
-        return new InMemoryRegisteredClientRepository(gateway, userService, mailService);
+        return new InMemoryRegisteredClientRepository(gateway, userService, mailService, postman);
     }
 
     private RegisteredClient gatewayClient() {
@@ -73,6 +74,25 @@ public class ClientManagementConfig {
                                                            .accessTokenTimeToLive(Duration.ofHours(1))
                                                            .build())
                                .scope(OidcScopes.OPENID)
+                               .build();
+    }
+
+    private RegisteredClient postmanClient() {
+        return RegisteredClient.withId(UUID.randomUUID()
+                                           .toString())
+                               .clientId("postman")
+                               .clientSecret("{noop}post")
+                               .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                               .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                               .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                               .redirectUri("https://oauth.pstmn.io/v1/callback")
+                               .scope(OidcScopes.OPENID)
+                               .clientSettings(ClientSettings.builder()
+                                                             .requireProofKey(false)
+                                                             .build())
+                               .tokenSettings(TokenSettings.builder()
+                                                           .accessTokenTimeToLive(Duration.ofHours(1))
+                                                           .build())
                                .build();
     }
 }

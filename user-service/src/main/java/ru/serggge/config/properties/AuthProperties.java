@@ -5,9 +5,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "resource-server")
+@ConfigurationProperties(prefix = "configuration.auth")
 @Data
-public class CustomSecurityProperties {
+public class AuthProperties {
 
+    private String authServerUrl;
     private String jwkSetUri;
+    private String tokenUri;
 }

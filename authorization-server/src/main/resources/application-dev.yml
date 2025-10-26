@@ -23,7 +23,7 @@ eureka:
 configuration:
   clients:
     gateway-secret: "{noop}secret"
-    gateway-redirect-uri: "http://localhost:9090/login/oauth2/code/client"
+    gateway-redirect-uri: "http://localhost:8080/login/oauth2/code/gateway"
     user-service-secret: "{noop}verySecret"
     mail-service-secret: "{noop}topSecret"
 

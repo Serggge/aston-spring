@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableDiscoveryClient
 @RefreshScope
-@EnableFeignClients(basePackages = "ru.serggge.service.proxy")
+@EnableFeignClients(basePackages = "ru.serggge.service.client")
 public class UserServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(UserServiceApplication.class, args);

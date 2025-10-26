@@ -12,17 +12,26 @@ spring:
         webflux:
           routes:
             - id: user-service
-              uri: ${configuration.user-service-uri}/users
+              uri: ${configuration.user-service-url}
               predicates:
-                - Path=/users
+                - Path=/users/**
               filters:
-                - TokenRelay=gateway
+                - RewritePath=/users/(?<segment>.*), /users/$\{segment}
+                - TokenRelay=
             - id: notification-service
-              uri: ${configuration.mail-service-uri}/mail
+              uri: ${configuration.mail-service-url}/mail
               predicates:
-                - Path=/mail
+                - Path=/mail/**
               filters:
-                - TokenRelay=gateway
+                - RewritePath=/mail/(?<segment>.*), /mail/$\{segment}
+                - TokenRelay=
+            - id: authorization-server
+              uri: ${configuration.auth-server-url}
+              predicates:
+                - Path=/auth/**
+              filters:
+                - RewritePath=/auth/?(?<segment>.*), /$\{segment}
+                - TokenRelay=
   security:
     oauth2:
       client:
@@ -36,4 +45,4 @@ spring:
             scope: openid
         provider:
           oauth:
-            issuer-uri: ${configuration.auth-server-uri}
+            issuer-uri: ${configuration.auth-server-url}

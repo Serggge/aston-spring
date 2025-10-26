@@ -6,19 +6,25 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/master.yml
-  config:
-    import: "configserver:"
-  cloud:
-    config:
-      fail-fast: true
-      discovery:
-        enabled: true
-        service-id: config-server
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:9000/oauth2/jwks
 
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL}
+#  config:
+#    import: "configserver:"
+#  cloud:
+#    config:
+#      fail-fast: true
+#      discovery:
+#        enabled: true
+#        service-id: config-server
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: ${EUREKA_URL}
 
 scheduler:
   enabled: true

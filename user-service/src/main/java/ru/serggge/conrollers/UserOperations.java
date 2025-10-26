@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import ru.serggge.exception.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import ru.serggge.dto.*;
+import ru.serggge.model.PojoAccountEvent;
 
 import java.util.List;
 

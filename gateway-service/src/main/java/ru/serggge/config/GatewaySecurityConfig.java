@@ -2,7 +2,6 @@ package ru.serggge.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -23,19 +22,18 @@ import org.springframework.security.web.server.header.ClearSiteDataServerHttpHea
 public class GatewaySecurityConfig {
 
     @Bean
-    public SecurityWebFilterChain defaultSecurityFilterChain(ServerHttpSecurity http,
-                                                             ServerOAuth2AuthorizationRequestResolver authorizationRequestResolver,
-                                                             ServerOAuth2AuthorizedClientRepository authorizedClientRepository,
-                                                             ServerLogoutSuccessHandler logoutSuccessHandler,
-                                                             ServerLogoutHandler logoutHandler) {
+    public SecurityWebFilterChain configure(ServerHttpSecurity http,
+                                            ServerOAuth2AuthorizationRequestResolver authorizationRequestResolver,
+                                            ServerOAuth2AuthorizedClientRepository authorizedClientRepository,
+                                            ServerLogoutSuccessHandler logoutSuccessHandler,
+                                            ServerLogoutHandler logoutHandler) {
         http
                 .authorizeExchange(
                         authorizeExchange -> authorizeExchange
                                 .pathMatchers(
                                         "/auth/register",
-                                        "/actuator/**",
-                                        "/access-token/**",
-                                        "/id-token")
+                                        "/auth/signin",
+                                        "/actuator/**")
                                 .permitAll()
                                 .anyExchange()
                                 .authenticated()
@@ -48,14 +46,15 @@ public class GatewaySecurityConfig {
                         logout.logoutSuccessHandler(logoutSuccessHandler)
                               .logoutHandler(logoutHandler)
                 )
-                .csrf(Customizer.withDefaults())
-                .build();
+                .csrf(ServerHttpSecurity.CsrfSpec::disable);
 
         return http.build();
     }
 
     @Bean
-    public ServerOAuth2AuthorizationRequestResolver requestResolver(ReactiveClientRegistrationRepository clientRegistrationRepository) {
+    public ServerOAuth2AuthorizationRequestResolver requestResolver(
+            ReactiveClientRegistrationRepository clientRegistrationRepository) {
+
         var resolver = new DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrationRepository);
         resolver.setAuthorizationRequestCustomizer(OAuth2AuthorizationRequestCustomizers.withPkce());
         return resolver;
@@ -67,7 +66,9 @@ public class GatewaySecurityConfig {
     }
 
     @Bean
-    public ServerLogoutSuccessHandler logoutSuccessHandler(ReactiveClientRegistrationRepository clientRegistrationRepository) {
+    public ServerLogoutSuccessHandler logoutSuccessHandler(
+            ReactiveClientRegistrationRepository clientRegistrationRepository) {
+
         OidcClientInitiatedServerLogoutSuccessHandler oidcLogoutSuccessHandler =
                 new OidcClientInitiatedServerLogoutSuccessHandler(clientRegistrationRepository);
         oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/login");
@@ -80,7 +81,8 @@ public class GatewaySecurityConfig {
                 new SecurityContextServerLogoutHandler(),
                 new WebSessionServerLogoutHandler(),
                 new HeaderWriterServerLogoutHandler(
-                        new ClearSiteDataServerHttpHeadersWriter(ClearSiteDataServerHttpHeadersWriter.Directive.COOKIES)
+                        new ClearSiteDataServerHttpHeadersWriter(
+                                ClearSiteDataServerHttpHeadersWriter.Directive.COOKIES)
                 )
         );
     }

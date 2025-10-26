@@ -1,3 +1,13 @@
+spring:
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      fail-fast: true
+      discovery:
+        enabled: true
+        service-id: config-server
+
 management:
   endpoints:
     web:

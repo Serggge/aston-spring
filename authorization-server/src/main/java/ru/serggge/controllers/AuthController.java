@@ -9,7 +9,6 @@ import ru.serggge.entity.Account;
 import ru.serggge.service.AccountService;
 
 @RestController
-@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
