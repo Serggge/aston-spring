@@ -1,12 +1,22 @@
+server:
+  port: 8080
+
+configuration:
+  user-service-url: lb://user-service
+  mail-service-url: lb://notification-service
+  auth-server-url: http://authorization-server
+  client-secret: secret
+
 spring:
   application:
     name: gateway-service
-  profiles:
-    active: dev
   cloud:
     gateway:
       server:
         webflux:
+          trusted-proxies:
+            - 127.0.0.1
+            - 10.0.0.0/8
           discovery:
             locator:
               enabled: true

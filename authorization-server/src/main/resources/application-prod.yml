@@ -1,0 +1,25 @@
+spring:
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      fail-fast: true
+      discovery:
+        enabled: true
+        service-id: config-server
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/master.yml
+
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: ${EUREKA_URL}
+
+configuration:
+  clients:
+    gateway-redirect-uri: http://localhost:8080/login/oauth2/code/gateway
+    gateway-secret: "{noop}secret"
+    user-service-secret: "{noop}verySecret"
+    mail-service-secret: "{noop}topSecret"

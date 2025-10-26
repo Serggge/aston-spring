@@ -27,20 +27,14 @@ spring:
       oauth2:
         enabled: true
         clientRegistrationId: user-service
-#feign:
-#  oauth2:
-#    enabled: true
-#    client-registration-id: user-service
+    config:
+      fail-fast: true
+      discovery:
+        enabled: true
+        service-id: config-server
 
-#  cloud:
-#    config:
-#      fail-fast: true
-#      discovery:
-#        enabled: true
-#        service-id: config-server
-
-#eureka:
-#  client:
-#    enabled: false
-#    service-url:
-#      defaultZone: ${EUREKA_URL}
+eureka:
+  client:
+    enabled: false
+    service-url:
+      defaultZone: ${EUREKA_URL}

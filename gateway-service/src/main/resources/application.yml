@@ -19,7 +19,7 @@ spring:
                 - RewritePath=/users/(?<segment>.*), /users/$\{segment}
                 - TokenRelay=
             - id: notification-service
-              uri: ${configuration.mail-service-url}/mail
+              uri: ${configuration.mail-service-url}
               predicates:
                 - Path=/mail/**
               filters:
