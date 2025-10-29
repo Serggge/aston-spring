@@ -3,38 +3,6 @@ spring:
     name: user-service
   profiles:
     active: dev
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/master.yml
-  security:
-    oauth2:
-      client:
-        registration:
-          user-service:
-            provider: oauth
-            client-id: user-service
-            client-authentication-method: client_secret_basic
-            client-secret: ${configuration.auth.client-secret}
-            authorization-grant-type: client_credentials
-            scope: openid
-        provider:
-          oauth:
-            authorization-uri: ${configuration.auth.authorization-uri}
-            jwk-set-uri: ${configuration.auth.jwk-set-uri}
-            token-uri: ${configuration.auth.token-uri}
-  cloud:
-    openfeign:
-      oauth2:
-        enabled: true
-        clientRegistrationId: user-service
-    config:
-      fail-fast: true
-      discovery:
-        enabled: true
-        service-id: config-server
 
-eureka:
-  client:
-    enabled: false
-    service-url:
-      defaultZone: ${EUREKA_URL}
+server:
+  shutdown: graceful

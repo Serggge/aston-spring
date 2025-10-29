@@ -17,8 +17,10 @@ public class NotificationServiceSecurityConfig {
                 .oauth2ResourceServer(configurer -> configurer
                         .jwt(Customizer.withDefaults()))
                 .authorizeHttpRequests(request -> request
-                .anyRequest()
-                .authenticated());
+                        .requestMatchers("/actuator/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated());
 
         return http.build();
     }

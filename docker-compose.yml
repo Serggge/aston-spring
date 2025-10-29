@@ -122,7 +122,7 @@ services:
       interval: 20s
       timeout: 5s
       retries: 20
-      start_period: 30s
+      start_period: 20s
     restart: unless-stopped
 
   user-service:
@@ -130,20 +130,30 @@ services:
     image: user_service
     container_name: user-service
     ports:
-      - "8090:8090"
+      - "8070:8070"
     depends_on:
       postgres:
         condition: service_healthy
       config-server:
         condition: service_healthy
+      authorization-server:
+        condition: service_healthy
+      broker-1:
+        condition: service_healthy
     environment:
       EUREKA_URL: http://discovery-service:8761/eureka/
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8070/actuator/health | grep UP || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
     restart: unless-stopped
 
-  notificationService1:
+  notification-service-1:
     build: ./notification-service/
     image: notification_service
-    container_name: mailsender_primary
+    container_name: mailsender-primary
     ports:
       - "8091:8091"
     depends_on:
@@ -152,19 +162,39 @@ services:
     environment:
       SERVER_PORT: 8091
       EUREKA_URL: http://discovery-service:8761/eureka/
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8091/actuator/health | grep UP || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
     restart: unless-stopped
 
-  notificationService2:
+  notification-service-2:
     image: notification_service
-    container_name: mailsender_second
+    container_name: mailsender-second
     ports:
       - "8092:8092"
     depends_on:
-      user-service:
-        condition: service_started
+      redis:
+        condition: service_healthy
+      authorization-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      broker-1:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8092
       EUREKA_URL: http://discovery-service:8761/eureka/
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8092/actuator/health | grep UP || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
     restart: unless-stopped
 
   controller-1:
@@ -211,7 +241,7 @@ services:
       - controller-1
       - controller-2
     healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 9091 || exit 1" ]
+      test: [ "CMD-SHELL", "nc -z localhost 9092 || exit 1" ]
       interval: 5s
       timeout: 10s
       retries: 3
@@ -238,7 +268,7 @@ services:
       - controller-1
       - controller-2
     healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 9091 || exit 1" ]
+      test: [ "CMD-SHELL", "nc -z localhost 9092 || exit 1" ]
       interval: 5s
       timeout: 10s
       retries: 3
@@ -267,7 +297,8 @@ services:
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
-      - user-service
+      user-service:
+        condition: service_healthy
     restart: unless-stopped
 
   grafana:

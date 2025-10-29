@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: authorization-server
   profiles:
     active: dev
   jpa:

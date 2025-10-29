@@ -45,4 +45,5 @@ spring:
             scope: openid
         provider:
           oauth:
-            issuer-uri: ${configuration.auth-server-url}
+            authorization-uri: ${configuration.auth-server-url}/oauth2/authorize
+            token-uri: ${configuration.auth-server-url}/oauth2/token

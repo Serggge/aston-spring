@@ -1,5 +1,6 @@
 server:
   port: 8080
+  shutdown: graceful
 
 configuration:
   user-service-url: lb://user-service
@@ -7,10 +8,22 @@ configuration:
   auth-server-url: http://authorization-server
   client-secret: secret
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL}
+
 spring:
   application:
     name: gateway-service
+  config:
+    import: "configserver:"
   cloud:
+    config:
+      fail-fast: true
+      discovery:
+        enabled: true
+        service-id: config-server
     gateway:
       server:
         webflux:
@@ -51,8 +64,3 @@ resilience4j.timelimiter:
     NotificationService:
       timeoutDuration: 5s
       cancelRunningFuture: false
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL}

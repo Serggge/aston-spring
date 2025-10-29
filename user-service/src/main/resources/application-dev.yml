@@ -4,9 +4,6 @@ server:
 configuration:
   auth:
     auth-server-url: http://localhost:9000
-    jwk-set-uri: ${configuration.auth.auth-server-url}/oauth2/jwks
-    token-uri: ${configuration.auth.auth-server-url}/oauth2/token
-    authorization-uri: ${configuration.auth.auth-server-url}/oauth2/authorize
     client-secret: verySecret
   services:
     mail-service-uri: http://localhost:8082
@@ -25,18 +22,41 @@ configuration:
 spring:
   datasource:
     driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:user-service-db
     username: sa
     password: sa
   h2:
     console:
-      enabled: false
+      enabled: true
   jpa:
     hibernate:
       ddl-auto: none
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/master.yml
   cloud:
     config:
       enabled: false
+    openfeign:
+      oauth2:
+        enabled: true
+        clientRegistrationId: user-service
+  security:
+    oauth2:
+      client:
+        registration:
+          user-service:
+            provider: oauth
+            client-id: user-service
+            client-authentication-method: client_secret_basic
+            client-secret: ${configuration.auth.client-secret}
+            authorization-grant-type: client_credentials
+            scope: openid
+        provider:
+          oauth:
+            authorization-uri: ${configuration.auth.auth-server-url}/oauth2/authorize
+            jwk-set-uri: ${configuration.auth.auth-server-url}/oauth2/jwks
+            token-uri: ${configuration.auth.auth-server-url}/oauth2/token
 
 eureka:
   client:
@@ -53,12 +73,8 @@ integration:
 endpoints:
   metrics:
     enabled: false
+
 management:
   endpoints:
     metrics:
       enabled: false
-
-hibernate:
-  hbm2ddl:
-    auto: validate
-  dialect: org.hibernate.dialect.PostgreSQLDialect

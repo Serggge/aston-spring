@@ -10,7 +10,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.*;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -40,6 +39,8 @@ public class UserServiceSecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.DELETE, "/users")
                         .hasRole("ADMIN")
+                        .requestMatchers("/actuator/**")
+                        .permitAll()
                         .anyRequest()
                         .authenticated());
 
@@ -48,15 +49,15 @@ public class UserServiceSecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withIssuerLocation(
-                                       authProperties.getAuthServerUrl())
-                               .build();
+        return NimbusJwtDecoder
+                .withJwkSetUri(authProperties.getJwkSetUri())
+                .build();
     }
 
     private Converter<Jwt, AbstractAuthenticationToken> converter() {
         return jwt -> {
             Collection<?> rawAuthorities = (Collection<?>) jwt.getClaims()
-                                                              .getOrDefault("roles", Collections.emptyList());
+                    .getOrDefault("roles", Collections.emptyList());
             Set<SimpleGrantedAuthority> roles = rawAuthorities
                     .stream()
                     .map(Object::toString)

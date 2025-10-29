@@ -1,3 +1,7 @@
+server:
+  port: 9000
+  shutdown: graceful
+
 spring:
   config:
     import: "configserver:"
@@ -19,7 +23,7 @@ eureka:
 
 configuration:
   clients:
-    gateway-redirect-uri: http://localhost:8080/login/oauth2/code/gateway
+    gateway-redirect-uri: http://gateway-service/login/oauth2/code/gateway
     gateway-secret: "{noop}secret"
     user-service-secret: "{noop}verySecret"
     mail-service-secret: "{noop}topSecret"
