@@ -1,59 +1,49 @@
 server:
-  port: 8080
   shutdown: graceful
 
 spring:
   application:
     name: gateway-service
+  profiles:
+    active: dev
   cloud:
     gateway:
       server:
         webflux:
-          discovery:
-            locator:
-              enabled: true
-              lower-case-service-id: true
-              predicates:
-                - name: Path
-                  args:
-                    pattern: "'/'+serviceId+'/**'"
-              filters:
-                - name: CircuitBreaker
-                  args:
-                    name: serviceId
-                - name: RewritePath
-                  args:
-                    regexp: "'/' + serviceId + '/?(?<remaining>.*)'"
-                    replacement: "'/${remaining}'"
           routes:
             - id: user-service
-              uri: lb://user-service
+              uri: ${configuration.user-service-url}
               predicates:
                 - Path=/users/**
+              filters:
+                - RewritePath=/users/(?<segment>.*), /users/$\{segment}
+                - TokenRelay=
             - id: notification-service
-              uri: lb://notification-service
+              uri: ${configuration.mail-service-url}
               predicates:
                 - Path=/mail/**
-
-resilience4j.circuitbreaker:
-  instances:
-    UserService:
-      registerHealthIndicator: true
-      slidingWindowSize: 5
-    NotificationService:
-      registerHealthIndicator: true
-      slidingWindowSize: 5
-
-resilience4j.timelimiter:
-  instances:
-    UserService:
-      timeoutDuration: 5s
-      cancelRunningFuture: false
-    NotificationService:
-      timeoutDuration: 5s
-      cancelRunningFuture: false
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL}
+              filters:
+                - RewritePath=/mail/(?<segment>.*), /mail/$\{segment}
+                - TokenRelay=
+            - id: authorization-server
+              uri: ${configuration.auth-server-url}
+              predicates:
+                - Path=/auth/**
+              filters:
+                - RewritePath=/auth/?(?<segment>.*), /$\{segment}
+                - TokenRelay=
+  security:
+    oauth2:
+      client:
+        registration:
+          gateway:
+            provider: oauth
+            client-id: gateway
+            client-secret: ${configuration.client-secret}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid
+        provider:
+          oauth:
+            authorization-uri: ${configuration.auth-server-url}/oauth2/authorize
+            token-uri: ${configuration.auth-server-url}/oauth2/token

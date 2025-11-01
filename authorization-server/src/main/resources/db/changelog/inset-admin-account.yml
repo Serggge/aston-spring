@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-admin-account
+      author: serggge
+      labels: insert-admin
+      comment: create admin credentials
+      changes:
+        - insert:
+            tableName: accounts
+            columns:
+              - column:
+                  name: login
+                  value: "admin"
+              - column:
+                  name: password
+                  value: "{noop}admin"
+              - column:
+                  name: role
+                  value: ROLE_ADMIN

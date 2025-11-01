@@ -1,5 +1,6 @@
 server:
   port: 8082
+
 spring:
   data:
     redis:
@@ -8,14 +9,6 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/master.yml
-  cloud:
-    config:
-      enabled: false
-
-eureka:
-  client:
-    enabled: false
-
   mail:
     host: smtp.mailbox.org
     port: 587
@@ -27,6 +20,13 @@ eureka:
           auth: true
           starttls:
             enable: true
+  cloud:
+    config:
+      enabled: false
+
+eureka:
+  client:
+    enabled: false
 
 kafka:
   configuration:

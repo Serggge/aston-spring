@@ -9,9 +9,10 @@ import org.springframework.stereotype.Service;
 import ru.serggge.config.properties.KafkaProducerProperties;
 import ru.serggge.entity.OutboxEvent;
 import ru.serggge.model.AccountEvent;
+import ru.serggge.model.PojoAccountEvent;
 import ru.serggge.repository.OutboxRepository;
+import ru.serggge.service.client.NotificationClient;
 import java.time.Instant;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,44 +21,46 @@ public class OutboxServiceImpl implements OutboxService {
 
     private final KafkaTemplate<String, AccountEvent> kafkaTemplate;
     private final OutboxRepository outboxRepository;
-    private final RestSenderService restSenderService;
+    private final NotificationClient notificationClient;
     private final KafkaProducerProperties kafkaProperties;
 
     @Override
-    @Scheduled(fixedRateString = "${scheduler.delay}")
+    @Scheduled(fixedRateString = "${configuration.scheduler.delay}")
     public void eventProcessing() {
         outboxRepository.findAllNonBlocked()
-                .stream()
-                .peek(event -> log.info("Prepare the message to sending: {}", event))
-                .map(this::mapToAccountEvent)
-                .forEach(this::sendEvent);
+                        .forEach(this::sendEvent);
     }
 
-    private void sendEvent(Map.Entry<Long, AccountEvent> entry) {
-        kafkaTemplate.send(
-                        kafkaProperties.getTopicName(),
-                        entry.getValue()
-                                .getEmail(),
-                        entry.getValue())
-                .whenComplete((sendResult, exception) -> {
-                    if (exception == null) {
-                        RecordMetadata record = sendResult.getRecordMetadata();
-                        printLogSuccess(entry.getValue(), record);
-                    } else {
-                        printLogFail(entry.getValue(), exception);
-                        restSenderService.sendEvent(entry.getValue());
-                    }
-                });
-        outboxRepository.deleteById(entry.getKey());
+    private void sendEvent(OutboxEvent outboxEvent) {
+        if (kafkaProperties.isEnabled()) {
+            sendUsingKafka(outboxEvent);
+        } else {
+            sendUsingRest(outboxEvent);
+        }
+        outboxRepository.deleteById(outboxEvent.getId());
     }
 
-    private Map.Entry<Long, AccountEvent> mapToAccountEvent(OutboxEvent outboxEvent) {
+    private void sendUsingKafka(OutboxEvent outboxEvent) {
         AccountEvent accountEvent = new AccountEvent(
                 outboxEvent.getEmail(),
-                outboxEvent.getEvent()
-                        .name(),
-                outboxEvent.getCreatedAt());
-        return Map.entry(outboxEvent.getId(), accountEvent);
+                outboxEvent.getEvent().name(),
+                Instant.now());
+
+        kafkaTemplate.send(kafkaProperties.getTopicName(), accountEvent.getEmail(), accountEvent)
+                     .whenComplete((sendResult, exception) -> {
+                         if (exception == null) {
+                             RecordMetadata record = sendResult.getRecordMetadata();
+                             printLogSuccess(accountEvent, record);
+                         } else {
+                             printLogFail(accountEvent, exception);
+                             sendUsingRest(outboxEvent);
+                         }
+                     });
+    }
+
+    private void sendUsingRest(OutboxEvent outboxEvent) {
+        PojoAccountEvent accountEvent = new PojoAccountEvent(outboxEvent.getEmail(), outboxEvent.getEvent().name());
+        notificationClient.sendNotification(accountEvent);
     }
 
     private void printLogSuccess(AccountEvent event, RecordMetadata record) {

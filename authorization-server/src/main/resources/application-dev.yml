@@ -1,0 +1,41 @@
+server:
+  port: 9000
+spring:
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:oauthTestDb
+    username: sa
+    password: sa
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+  cloud:
+    config:
+      enabled: false
+
+eureka:
+  client:
+    enabled: false
+
+configuration:
+  clients:
+    gateway-secret: "{noop}secret"
+    gateway-redirect-uri: "http://localhost:8080/login/oauth2/code/gateway"
+    user-service-secret: "{noop}verySecret"
+    mail-service-secret: "{noop}topSecret"
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        orm:
+          jdbc:
+            bind: TRACE
+      springframework.web: INFO
+      springframework.web.HttpLogging: DEBUG
+      springframework.security: TRACE
+      springframework.security.oauth2: TRACE

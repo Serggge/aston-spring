@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/create-table-accounts.yml
+  - include:
+      file: db/changelog/inset-admin-account.yml

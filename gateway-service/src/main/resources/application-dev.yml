@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: TRACE
+    org.springframework.web.HttpLogging: DEBUG
+    org.springframework.security: TRACE
+    org.springframework.security.oauth2: TRACE
+    org.springframework.cloud.gateway: TRACE
+
+configuration:
+  user-service-url: http://localhost:8070
+  mail-service-url: http://localhost:8082
+  auth-server-url: http://127.0.0.1:9000
+
+
+spring:
+  cloud:
+    config:
+      enabled: false
+      discovery:
+        enabled:
+
+eureka:
+  client:
+    enabled: false

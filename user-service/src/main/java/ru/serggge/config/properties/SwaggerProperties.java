@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
-@ConfigurationProperties(prefix = "swagger")
+@ConfigurationProperties(prefix = "configuration.swagger")
 @ConfigurationPropertiesScan
 @Component
 @Data

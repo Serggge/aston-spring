@@ -27,7 +27,7 @@ import java.util.Map;
 @EnableKafka
 @RequiredArgsConstructor
 @Slf4j
-@Profile("!test")
+@Profile("prod")
 public class KafkaProducerConfig {
 
     private final KafkaProducerProperties kafkaProperties;
